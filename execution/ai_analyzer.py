@@ -19,14 +19,16 @@ class AIAnalyzer:
     使用Claude API进行真实的行业分析推理
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
         """
         初始化AI分析引擎
 
         Args:
             api_key: Anthropic API密钥（可选，从环境变量读取）
+            base_url: API Base URL（可选，用于中转站）
         """
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
+        self.base_url = base_url or os.environ.get('ANTHROPIC_BASE_URL')
         self.model = 'claude-3-5-sonnet-20241022'  # 使用Claude 3.5 Sonnet
 
     def analyze_with_framework(self,
@@ -121,6 +123,8 @@ class AIAnalyzer:
 
         注意：这是一个简化的实现示例
         实际使用时需要安装anthropic包: pip install anthropic
+
+        支持中转站：设置ANTHROPIC_BASE_URL环境变量即可
         """
         if not self.api_key:
             raise ValueError("未设置ANTHROPIC_API_KEY环境变量")
@@ -128,7 +132,14 @@ class AIAnalyzer:
         try:
             import anthropic
 
-            client = anthropic.Anthropic(api_key=self.api_key)
+            # 支持自定义base_url（中转站）
+            if self.base_url:
+                client = anthropic.Anthropic(
+                    api_key=self.api_key,
+                    base_url=self.base_url
+                )
+            else:
+                client = anthropic.Anthropic(api_key=self.api_key)
 
             message = client.messages.create(
                 model=self.model,
