@@ -65,7 +65,7 @@ class DataSourceSelector:
         category = self.classify_industry_category(industry_name)
 
         if category == '其他':
-            print(f"⚠️  未知行业分类，使用通用搜索模板")
+            print(f"[WARNING] Unknown industry category, using generic search template")
             return self._generate_generic_keywords(industry_name)
 
         category_data = self.tree['data_source_tree']['by_industry_category'][category]
