@@ -174,13 +174,13 @@ class IndustryResearchOrchestrator:
             collected_data.get('sources', [])
         )
 
-        print(f"   Package: {deliverable['path']}")
+        print(f"   Package: {deliverable.get('html_path', 'N/A')}")
 
         return {
             'status': 'success',
             'mode': 'quick',
             'industry': industry,
-            'path': deliverable['path'],
+            'path': deliverable.get('html_path', ''),
             'charts': chart_summary['count'],
             'data_sources': len(collected_data.get('sources', [])),
             'tier1_coverage': collected_data.get('tier1_coverage', 0),

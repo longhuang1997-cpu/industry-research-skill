@@ -46,24 +46,31 @@ class Packager:
         print(f"\n[Packager] Packaging quick deliverable...")
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_path = self.output_dir / f'quick_summary_{timestamp}.pdf'
 
-        # TODO: 实现PDF生成
-        # 当前版本仅创建元数据
+        # 保存HTML报告
+        html_path = self.output_dir / f'executive_summary_{timestamp}.html'
+        html_content = summary.get('html', '')
+
+        if html_content:
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            print(f"   [OK] HTML report saved: {html_path.name}")
+
         deliverable = {
             'type': 'quick',
-            'format': 'pdf',
-            'path': str(output_path),
+            'format': 'html',
+            'html_path': str(html_path),
             'timestamp': timestamp,
             'contents': {
-                'summary': summary,
+                'summary': summary.get('title', ''),
                 'charts': f'{len(charts)}张图表',
-                'data_sources': f'{len(data_sources)}个数据源'
+                'data_sources': f'{len(data_sources)}个数据源',
+                'key_findings': len(summary.get('key_findings', []))
             },
-            'size': '待生成'
+            'size': f'{len(html_content)} bytes' if html_content else '0 bytes'
         }
 
-        print(f"   [OK] Deliverable packaged: {output_path.name}")
+        print(f"   [OK] Deliverable packaged: {html_path.name}")
 
         return deliverable
 
