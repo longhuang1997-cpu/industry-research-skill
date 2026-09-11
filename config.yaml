@@ -1,0 +1,53 @@
+skill:
+  name: industry-research
+  version: 0.1.0-alpha
+  mode: quick  # quick | full
+
+paths:
+  skill_root: .
+  knowledge_dir: knowledge
+  execution_dir: execution
+  output_dir: output
+  ui_dir: ui
+  temp_dir: /tmp/industry-research
+
+quick_mode:
+  estimated_time: 70  # minutes
+  max_charts: 5
+  output_format: pdf
+  cpm_steps:
+    - data_collection
+    - framework_analysis
+    - quick_visualization
+    - executive_summary
+    - quality_check
+    - packaging
+
+full_mode:
+  estimated_time: 240  # minutes
+  human_decision_points: 3
+  output_format: html
+  phases:
+    - need_clarification
+    - data_collection
+    - framework_analysis
+    - insight_generation
+    - visualization
+    - delivery
+
+execution:
+  auto_web_search: true
+  chart_engine: matplotlib
+  parallel_tasks: 3
+  max_retries: 2
+
+output:
+  quality_check_enabled: true
+  auto_fix: true
+  silent_mode: true
+  checks:
+    - data_sources
+    - financial_model
+    - chart_quality
+    - logic_consistency
+    - html_format
