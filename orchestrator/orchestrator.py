@@ -45,6 +45,7 @@ class IndustryResearchOrchestrator:
         from execution.framework_applier import FrameworkApplier
         from execution.chart_generator import ChartGenerator
         from execution.consulting_ai_analyzer import ConsultingAIAnalyzer
+        from execution.workflow_engine import WorkflowEngine, ResearchDepth, AnalysisDimension
         from output.quality_checker import QualityChecker
         from output.report_generator import ReportGenerator
         from output.packaging import Packager
@@ -54,10 +55,11 @@ class IndustryResearchOrchestrator:
         self.data_source_selector = DataSourceSelector()
         self.data_collector = DataCollector()
         self.framework_applier = FrameworkApplier()
-        self.ai_analyzer = ConsultingAIAnalyzer()  # 新增：AI分析引擎
+        self.ai_analyzer = ConsultingAIAnalyzer()
+        self.workflow_engine = WorkflowEngine()  # 新增：工作流引擎
         self.quality_checker = QualityChecker()
         self.report_generator = ReportGenerator()
-        self.professional_generator = ProfessionalReportGenerator()  # 新增：专业报告生成器
+        self.professional_generator = ProfessionalReportGenerator()
         self.packager = Packager()
 
     def run(self, industry_name, user_params=None):
@@ -157,22 +159,347 @@ class IndustryResearchOrchestrator:
 
     def _collect_requirements(self, industry_name, user_params):
         """
-        收集研究需求
+        收集研究需求并生成工作流
 
-        TODO: 弹出HTML表单收集需求
+        根据用户输入解析：维度、深度、输出选项
+        使用WorkflowEngine生成灵活的研究计划
         """
-        if user_params:
-            return user_params
+        from execution.workflow_engine import ResearchDepth, AnalysisDimension, WorkflowConfig
 
-        # 当前版本: 使用默认参数
+        if user_params is None:
+            user_params = {}
+
+        # 1. 解析研究深度
+        depth = user_params.get('depth', None)
+        if depth == 'quick' or depth == '10分钟' or depth == '快速':
+            research_depth = ResearchDepth.QUICK
+        elif depth == 'standard' or depth == '30分钟' or depth == '标准':
+            research_depth = ResearchDepth.STANDARD
+        elif depth == 'deep' or depth == '60分钟' or depth == '深度':
+            research_depth = ResearchDepth.DEEP
+        elif depth == 'custom' or depth == '自定义':
+            research_depth = ResearchDepth.CUSTOM
+        else:
+            # 默认：quick模式用STANDARD，full模式用DEEP
+            if self.mode == 'quick':
+                research_depth = ResearchDepth.STANDARD  # 30分钟标准研究
+            else:
+                research_depth = ResearchDepth.DEEP
+
+        # 2. 解析分析维度
+        dimensions = user_params.get('dimensions', None)
+        if dimensions:
+            # 用户明确指定维度
+            dimension_map = {
+                '政策': AnalysisDimension.POLICY,
+                '政策环境': AnalysisDimension.POLICY,
+                '市场': AnalysisDimension.MARKET_SIZE,
+                '市场规模': AnalysisDimension.MARKET_SIZE,
+                '商业模式': AnalysisDimension.BUSINESS_MODEL,
+                '竞争': AnalysisDimension.COMPETITION,
+                '竞争格局': AnalysisDimension.COMPETITION,
+                '壁垒': AnalysisDimension.ENTRY_BARRIERS,
+                '进入壁垒': AnalysisDimension.ENTRY_BARRIERS,
+                '产业链': AnalysisDimension.SUPPLY_CHAIN,
+                '风险': AnalysisDimension.RISK_ANALYSIS,
+                '风险分析': AnalysisDimension.RISK_ANALYSIS,
+                '机会': AnalysisDimension.OPPORTUNITIES,
+                '机会识别': AnalysisDimension.OPPORTUNITIES
+            }
+
+            selected_dimensions = []
+            for dim_str in dimensions:
+                if dim_str in dimension_map:
+                    selected_dimensions.append(dimension_map[dim_str])
+        else:
+            # 没有指定，使用预定义工作流
+            selected_dimensions = []
+
+        # 3. 创建工作流配置
+        workflow_config = WorkflowConfig(
+            depth=research_depth,
+            dimensions=selected_dimensions,
+            include_charts=user_params.get('include_charts', True),
+            include_data_tables=user_params.get('include_data_tables', True),
+            generate_pdf=user_params.get('generate_pdf', False)
+        )
+
+        # 4. 使用WorkflowEngine生成工作流
+        workflow_steps = self.workflow_engine.create_workflow(workflow_config)
+        total_time = self.workflow_engine.estimate_total_time(workflow_steps)
+
+        # 5. 可视化工作流
+        workflow_viz = self.workflow_engine.visualize_workflow(workflow_steps)
+
         return {
             'industry': industry_name,
-            'web_search': True,
-            'chart_style': 'data_accurate',
+            'workflow_config': workflow_config,
+            'workflow_steps': workflow_steps,
+            'estimated_time': total_time,
+            'workflow_viz': workflow_viz,
+            'web_search': user_params.get('web_search', True),
+            'chart_style': user_params.get('chart_style', 'data_accurate'),
             'mode': self.mode
         }
 
     def _run_quick_mode(self, brief):
+        """
+        快速模式：根据WorkflowEngine生成的步骤执行
+
+        动态执行用户选择的分析维度
+        """
+        print("\n" + "="*60)
+        print("🚀 开始行业研究")
+        print("="*60)
+
+        industry = brief['industry']
+        workflow_steps = brief.get('workflow_steps', [])
+        estimated_time = brief.get('estimated_time', 60)
+
+        # 显示工作流计划
+        print(f"预计耗时: {estimated_time} 分钟")
+        print(f"分析步骤: {len(workflow_steps)} 个")
+
+        # 显示简化的工作流
+        print("\n分析维度:")
+        for i, step in enumerate(workflow_steps, 1):
+            print(f"  {i}. {step.name} (约{step.estimated_time}分钟)")
+
+        print("\n💡 您可以离开去做其他事，完成后会通知您")
+        print("="*60)
+
+        # Phase 1: 数据收集
+        print("\n🔍 [1/6] 正在收集行业数据...")
+        print("   预计耗时: 10-15分钟")
+        collected_data = self.data_collector.auto_collect(
+            industry=industry,
+            year=2024,
+            data_source_selector=self.data_source_selector
+        )
+
+        collected_data['industry'] = industry
+
+        print(f"   ✓ 已收集 {len(collected_data.get('sources', []))}个数据源")
+        print(f"   ✓ Tier 1覆盖率: {collected_data.get('tier1_coverage', 0):.1%}")
+
+        # Phase 2: 根据WorkflowEngine执行分析
+        print("\n💡 [2/6] 正在进行深度分析...")
+        print(f"   预计耗时: {estimated_time - 30} 分钟")
+
+        # 应用框架
+        frameworks = self.framework_selector.select_frameworks(industry)
+        framework_analysis = self.framework_applier.apply(frameworks, collected_data)
+
+        print(f"   ✓ 已应用 {len(frameworks)} 个分析框架")
+
+        # 根据workflow_steps动态执行AI分析
+        print("\n   💡 AI正在生成咨询级深度分析...")
+
+        analysis_results = {}
+
+        # 总是执行行业画像（必需）
+        print("      → 分析行业定位...")
+        profile = self.ai_analyzer._analyze_industry_profile(industry)
+        analysis_results['profile'] = profile
+
+        # 根据workflow_steps执行对应维度的分析
+        from execution.workflow_engine import AnalysisDimension
+
+        for step in workflow_steps:
+            if step.dimension == AnalysisDimension.POLICY and step.name != "行业画像":
+                print("      → 分析政策环境...")
+                analysis_results['policy'] = self.ai_analyzer._analyze_policy_environment(industry, collected_data)
+
+            elif step.dimension == AnalysisDimension.MARKET_SIZE and step.name != "行业画像":
+                print("      → 测算市场规模...")
+                analysis_results['market_size'] = self.ai_analyzer._analyze_market_size(industry, collected_data)
+
+            elif step.dimension == AnalysisDimension.BUSINESS_MODEL:
+                print("      → 拆解商业模式...")
+                analysis_results['business_model'] = self.ai_analyzer._analyze_business_model(industry, collected_data)
+
+            elif step.dimension == AnalysisDimension.COMPETITION:
+                print("      → 分析竞争格局...")
+                if hasattr(self.ai_analyzer, '_analyze_competition'):
+                    analysis_results['competition'] = self.ai_analyzer._analyze_competition(industry, collected_data)
+
+            elif step.dimension == AnalysisDimension.ENTRY_BARRIERS:
+                print("      → 评估进入壁垒...")
+                if hasattr(self.ai_analyzer, '_analyze_entry_barriers'):
+                    analysis_results['entry_barriers'] = self.ai_analyzer._analyze_entry_barriers(industry, collected_data)
+
+            # 其他维度可以继续扩展...
+
+        # 合并分析结果
+        framework_analysis['ai_insights'] = analysis_results
+
+        # 显示质量分数
+        print(f"\n   ✓ AI分析完成")
+        for key, result in analysis_results.items():
+            if key != 'profile' and isinstance(result, dict) and 'quality_score' in result:
+                print(f"      {key}: {result.get('quality_score', 0):.2f}/1.00")
+
+        # Phase 3-6: 保持原有流程（图表、报告、质检、打包）
+        return self._complete_research(
+            industry, profile, analysis_results,
+            framework_analysis, collected_data,
+            brief.get('workflow_config')
+        )
+
+    def _complete_research(self, industry, profile, analysis_results,
+                          framework_analysis, collected_data, workflow_config):
+        """
+        完成研究的后续步骤：图表、报告、质检、打包
+
+        抽取出来复用于quick和full模式
+        """
+        # Phase 3: 生成核心图表
+        print("\n📊 [3/6] 正在生成可视化图表...")
+        print("   预计耗时: 5-8分钟")
+
+        chart_data = self._prepare_chart_data(industry, framework_analysis, collected_data)
+
+        from execution.chart_generator import ChartGenerator
+        chart_generator = ChartGenerator(industry=industry)
+
+        if workflow_config and workflow_config.include_charts:
+            chart_paths = chart_generator.generate_core_charts(chart_data)
+        else:
+            chart_paths = {}
+
+        chart_summary = chart_generator.get_chart_summary()
+        print(f"   ✓ 已生成 {chart_summary['count']} 张专业图表")
+
+        # Phase 4: 生成专业报告
+        print("\n📄 [4/6] 正在生成专业报告...")
+        print("   预计耗时: 3-5分钟")
+
+        research_data = {
+            'profile': profile,
+            'analysis': analysis_results,
+            'frameworks': framework_analysis,
+            'charts': chart_paths
+        }
+
+        report_path = self.professional_generator.generate_report(
+            industry=industry,
+            research_data=research_data,
+            report_type='quick'
+        )
+
+        print(f"   ✓ 专业报告已生成")
+
+        # Phase 5: 质量检查
+        print("\n✅ [5/6] 正在进行质量检查...")
+        print("   预计耗时: 2-3分钟")
+
+        quality_data = {
+            'ai_analysis': framework_analysis.get('ai_insights', {}),
+            'framework_analysis': framework_analysis,
+            'charts': chart_paths,
+            'data_sources': collected_data.get('sources', [])
+        }
+
+        issues = self.quality_checker.check_all(
+            quality_data,
+            chart_paths,
+            collected_data
+        )
+
+        if issues:
+            print(f"   ⚠️  发现 {len(issues)} 个问题（可接受范围内）")
+        else:
+            print(f"   ✓ 质量检查通过")
+
+        # Phase 6: 打包交付
+        print("\n📦 [6/6] 正在打包交付物...")
+        print("   预计耗时: 1-2分钟")
+
+        deliverable = self.packager.package_quick_deliverable(
+            research_data,
+            chart_paths,
+            collected_data.get('sources', [])
+        )
+
+        print(f"   ✓ 打包完成")
+
+        # 展示核心结论
+        self._display_insights(industry, profile, analysis_results)
+
+        # 保存上下文
+        context_file = self.skill_root / "output" / f"{industry}_context.md"
+        self._save_context_for_followup(industry, profile, analysis_results, context_file)
+
+        print(f"\n📝 分析内容已保存，您现在可以直接询问报告中的任何问题")
+
+        # 计算平均质量
+        quality_scores = []
+        for key, result in analysis_results.items():
+            if key != 'profile' and isinstance(result, dict) and 'quality_score' in result:
+                quality_scores.append(result.get('quality_score', 0))
+
+        avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else 0
+
+        return {
+            'status': 'success',
+            'mode': 'quick',
+            'industry': industry,
+            'path': report_path,
+            'context_file': str(context_file),
+            'charts': chart_summary['count'],
+            'data_sources': len(collected_data.get('sources', [])),
+            'tier1_coverage': collected_data.get('tier1_coverage', 0),
+            'quality_issues': len(issues),
+            'ai_quality_avg': avg_quality,
+            'analysis_content': analysis_results
+        }
+
+    def _display_insights(self, industry, profile, analysis_results):
+        """
+        在对话中展示核心洞察
+        """
+        print("\n" + "="*60)
+        print("✅ 研究完成！")
+        print("="*60)
+        print(f"\n📊 【{industry}】行业核心洞察\n")
+
+        # 展示行业画像
+        print("🎯 行业定位")
+        print(f"{profile.get('summary', '暂无数据')}\n")
+
+        # 展示各维度分析（动态）
+        dimension_labels = {
+            'policy': ('📋 政策环境', '政策'),
+            'market_size': ('💰 市场规模', '市场'),
+            'business_model': ('💡 商业模式', '商业模式'),
+            'competition': ('🏆 竞争格局', '竞争'),
+            'entry_barriers': ('🚧 进入壁垒', '壁垒')
+        }
+
+        for key, result in analysis_results.items():
+            if key == 'profile':
+                continue
+
+            if key in dimension_labels:
+                label, short_name = dimension_labels[key]
+                print(label)
+
+                content = result.get('content', '暂无数据')
+                preview = content[:200] + "..." if len(content) > 200 else content
+                print(f"{preview}")
+
+                if 'quality_score' in result:
+                    print(f"   质量分数: {result.get('quality_score', 0):.2f}/1.00\n")
+                else:
+                    print()
+
+        print("="*60)
+        print("📄 完整交付物")
+        print("="*60)
+        print("\n💡 您可以：")
+        print("1. 打开完整报告查看所有图表和详细分析")
+        print("2. 询问报告中的具体内容（如：竞争格局怎么样？）")
+        print("3. 对比其他行业或深入某个维度")
         """
         快速模式CPM路径 (70分钟)
 
