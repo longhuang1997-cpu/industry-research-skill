@@ -1,0 +1,171 @@
+# 政策文件爬虫MCP服务器配置
+
+server:
+  name: "policy-crawler"
+  version: "0.1.0"
+  description: "政府政策文件爬取服务"
+
+# 政府部门配置
+departments:
+  ndrc:
+    name: "国家发改委"
+    url: "https://www.ndrc.gov.cn"
+    policy_list: "https://www.ndrc.gov.cn/fggz/"
+    search: "https://sousuo.ndrc.gov.cn/search/fullsearch"
+    encoding: "utf-8"
+
+  miit:
+    name: "工信部"
+    url: "https://www.miit.gov.cn"
+    policy_list: "https://www.miit.gov.cn/zwgk/zcwj/"
+    search: "https://www.miit.gov.cn/search"
+    encoding: "utf-8"
+
+  nhc:
+    name: "国家卫健委"
+    url: "http://www.nhc.gov.cn"
+    policy_list: "http://www.nhc.gov.cn/wjw/gfxwj/list.shtml"
+    search: "http://www.nhc.gov.cn/search"
+    encoding: "utf-8"
+
+  mca:
+    name: "民政部"
+    url: "https://www.mca.gov.cn"
+    policy_list: "https://www.mca.gov.cn/article/zcwj/"
+    search: "https://www.mca.gov.cn/searchPage.do"
+    encoding: "utf-8"
+
+  moe:
+    name: "教育部"
+    url: "http://www.moe.gov.cn"
+    policy_list: "http://www.moe.gov.cn/jyb_xxgk/moe_1777/"
+    search: "http://www.moe.gov.cn/jyb_xxgk/moe_1777/moe_1778/"
+    encoding: "utf-8"
+
+  pbc:
+    name: "中国人民银行"
+    url: "http://www.pbc.gov.cn"
+    policy_list: "http://www.pbc.gov.cn/zhengcehuobisi/"
+    search: "http://www.pbc.gov.cn/search/search.jsp"
+    encoding: "utf-8"
+
+# 行业到部门映射
+industry_department_map:
+  医疗陪护:
+    - nhc
+    - mca
+  养老服务:
+    - mca
+    - nhc
+  在线教育:
+    - moe
+  金融科技:
+    - pbc
+  新能源汽车:
+    - miit
+    - ndrc
+  云计算:
+    - miit
+  人工智能:
+    - miit
+    - ndrc
+  大数据:
+    - miit
+
+# 政策分类关键词
+policy_classification:
+  规划类:
+    - "规划"
+    - "计划"
+    - "方案"
+    - "纲要"
+  补贴类:
+    - "补贴"
+    - "资金"
+    - "奖励"
+    - "扶持"
+  监管类:
+    - "监管"
+    - "管理"
+    - "办法"
+    - "条例"
+  标准类:
+    - "标准"
+    - "规范"
+    - "指南"
+    - "准则"
+
+# 政策倾向关键词
+policy_sentiment:
+  support:  # 支持性政策
+    - "支持"
+    - "鼓励"
+    - "补贴"
+    - "扶持"
+    - "优惠"
+    - "奖励"
+    - "推动"
+    - "促进"
+  regulation:  # 监管性政策
+    - "监管"
+    - "规范"
+    - "整治"
+    - "限制"
+    - "禁止"
+    - "严格"
+    - "管控"
+
+# 缓存配置
+cache:
+  enabled: true
+  ttl: 604800  # 7天（政策更新不频繁）
+  max_size: 500
+  storage: "disk"  # 政策文件较大，使用磁盘缓存
+  path: "./cache/policies/"
+
+# 爬虫配置
+crawler:
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  timeout: 15
+  retry: 3
+  delay: 3  # 政府网站请求间隔（秒）
+
+  # 代理配置
+  proxy:
+    enabled: false
+    http: ""
+    https: ""
+
+  # Selenium配置（处理JavaScript）
+  selenium:
+    enabled: false
+    driver: "chrome"
+    headless: true
+    wait_time: 5
+
+# 数据库配置（本地政策库）
+database:
+  enabled: true
+  type: "sqlite"
+  path: "./database/policies.db"
+
+  # 表结构
+  tables:
+    policies:
+      - id: "TEXT PRIMARY KEY"
+      - title: "TEXT"
+      - url: "TEXT"
+      - department: "TEXT"
+      - department_code: "TEXT"
+      - date: "TEXT"
+      - content: "TEXT"
+      - summary: "TEXT"
+      - category: "TEXT"
+      - sentiment: "TEXT"
+      - created_at: "TIMESTAMP"
+
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/policy_crawler.log"
