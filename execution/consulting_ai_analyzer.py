@@ -353,12 +353,18 @@ Bottom-up验证：头部企业（小鸟慧医）年营收约8亿元，市占率�
 
             message = client.messages.create(
                 model=self.model,
-                max_tokens=2048,  # 增加token数以支持更长的分析
-                temperature=0.7,  # 适当的创造性
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
                 messages=[{"role": "user", "content": prompt}]
             )
 
-            return message.content[0].text.strip()
+            # 处理响应：找到TextBlock（跳过ThinkingBlock）
+            for block in message.content:
+                if hasattr(block, 'text'):
+                    return block.text.strip()
+
+            # 如果没有找到文本块，返回空字符串
+            return ""
 
         except ImportError:
             raise ImportError("需要安装anthropic包: pip install anthropic")
