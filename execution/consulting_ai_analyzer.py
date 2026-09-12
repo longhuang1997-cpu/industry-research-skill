@@ -11,6 +11,7 @@
 import os
 from typing import Dict, List, Optional
 import json
+from pathlib import Path
 
 
 class ConsultingAIAnalyzer:
@@ -28,9 +29,34 @@ class ConsultingAIAnalyzer:
             api_key: Anthropic API密钥
             base_url: API Base URL（用于中转站）
         """
-        self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
-        self.base_url = base_url or os.environ.get('ANTHROPIC_BASE_URL')
+        # 优先级：传入参数 > 环境变量 > Claude Code settings.json
+        self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY') or self._read_from_claude_settings('ANTHROPIC_AUTH_TOKEN')
+        self.base_url = base_url or os.environ.get('ANTHROPIC_BASE_URL') or self._read_from_claude_settings('ANTHROPIC_BASE_URL')
         self.model = 'claude-sonnet-5'  # 使用Claude Sonnet 5获得更好的推理能力
+
+    def _read_from_claude_settings(self, key: str) -> Optional[str]:
+        """
+        从Claude Code的settings.json读取配置
+
+        Args:
+            key: 配置键名
+
+        Returns:
+            配置值，如果不存在返回None
+        """
+        try:
+            # Claude Code settings.json通常在用户目录下的.claude文件夹
+            settings_path = Path.home() / '.claude' / 'settings.json'
+
+            if settings_path.exists():
+                with open(settings_path, 'r', encoding='utf-8') as f:
+                    settings = json.load(f)
+                    return settings.get('env', {}).get(key)
+        except Exception:
+            # 静默失败，不影响其他初始化方式
+            pass
+
+        return None
 
     def deep_industry_analysis(self,
                                industry: str,
