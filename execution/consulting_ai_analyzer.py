@@ -12,6 +12,7 @@ import os
 from typing import Dict, List, Optional
 import json
 from pathlib import Path
+from execution.model_config import ModelConfigManager
 
 
 class ConsultingAIAnalyzer:
@@ -21,42 +22,31 @@ class ConsultingAIAnalyzer:
     生成真正有深度、有数据支撑的行业研究洞察
     """
 
-    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
+    def __init__(self,
+                 api_key: Optional[str] = None,
+                 base_url: Optional[str] = None,
+                 model: Optional[str] = None):
         """
         初始化咨询级AI分析引擎
 
         Args:
-            api_key: Anthropic API密钥
-            base_url: API Base URL（用于中转站）
+            api_key: Anthropic API密钥（可选）
+            base_url: API Base URL（可选，用于中转站）
+            model: 模型ID（可选）
         """
-        # 优先级：传入参数 > 环境变量 > Claude Code settings.json
-        self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY') or self._read_from_claude_settings('ANTHROPIC_AUTH_TOKEN')
-        self.base_url = base_url or os.environ.get('ANTHROPIC_BASE_URL') or self._read_from_claude_settings('ANTHROPIC_BASE_URL')
-        self.model = 'claude-sonnet-5'  # 使用Claude Sonnet 5获得更好的推理能力
+        # 使用模型配置管理器加载配置
+        config_manager = ModelConfigManager()
+        config = config_manager.load_config(
+            api_key=api_key,
+            base_url=base_url,
+            model=model
+        )
 
-    def _read_from_claude_settings(self, key: str) -> Optional[str]:
-        """
-        从Claude Code的settings.json读取配置
-
-        Args:
-            key: 配置键名
-
-        Returns:
-            配置值，如果不存在返回None
-        """
-        try:
-            # Claude Code settings.json通常在用户目录下的.claude文件夹
-            settings_path = Path.home() / '.claude' / 'settings.json'
-
-            if settings_path.exists():
-                with open(settings_path, 'r', encoding='utf-8') as f:
-                    settings = json.load(f)
-                    return settings.get('env', {}).get(key)
-        except Exception:
-            # 静默失败，不影响其他初始化方式
-            pass
-
-        return None
+        self.api_key = config.api_key
+        self.base_url = config.base_url
+        self.model = config.model
+        self.max_tokens = config.max_tokens
+        self.temperature = config.temperature
 
     def deep_industry_analysis(self,
                                industry: str,

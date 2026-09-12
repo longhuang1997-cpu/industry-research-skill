@@ -1,0 +1,57 @@
+# Industry Research Skill - 配置文件
+
+skill:
+  name: industry-research
+  version: 0.3.0
+  description: AI驱动的咨询级行业研究工具
+
+# 模型配置
+model:
+  # 模型提供商: anthropic, openai, azure, custom
+  provider: anthropic
+
+  # 模型ID
+  model: claude-sonnet-5
+
+  # API密钥（可选：留空则从环境变量读取）
+  # 优先级：这里的配置 > 环境变量 > Claude Code settings.json
+  api_key: ""
+
+  # API Base URL（可选：用于中转站或自定义端点）
+  base_url: ""
+
+  # 生成参数
+  max_tokens: 2048
+  temperature: 0.7
+
+# 路径配置
+paths:
+  skill_root: "."
+  output: "output"
+  charts: "output/charts"
+
+# 研究配置
+research:
+  # 默认模式: quick | full
+  default_mode: quick
+
+  # 快速模式配置
+  quick:
+    focus_areas: ["政策环境", "市场规模", "商业模式"]
+    max_charts: 5
+
+  # 全量模式配置
+  full:
+    focus_areas: ["政策环境", "市场规模", "商业模式", "竞争格局", "进入壁垒"]
+    max_charts: 15
+
+# 远程调用配置（用于技能市场、workbuddy等平台）
+remote:
+  # 是否启用远程调用模式
+  enabled: false
+
+  # 远程调用认证密钥（可选）
+  auth_token: ""
+
+  # 回调URL（可选）
+  callback_url: ""
