@@ -118,7 +118,7 @@ def main():
     # 输出结果
     print("\n" + "="*60)
     if result['status'] == 'success':
-        print("✅ 研究完成！")
+        print("[SUCCESS] 研究完成!")
         print("="*60)
         print(f"\n行业: {result['industry']}")
         print(f"模式: {result.get('mode', 'quick')}")
@@ -126,7 +126,7 @@ def main():
         print(f"平均质量分: {result.get('quality', {}).get('avg_quality', 0):.2f}")
         print(f"预计时间: {result.get('total_time', 0)} 分钟")
     else:
-        print("❌ 研究失败")
+        print("[ERROR] 研究失败")
         print("="*60)
         print(f"\n错误: {result.get('error', '未知错误')}")
 

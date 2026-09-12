@@ -70,7 +70,7 @@ class Orchestrator:
             }
         """
         print(f"\n{'='*60}")
-        print(f"🔍 开始研究: {industry}")
+        print(f"开始研究: {industry}")
         print(f"{'='*60}\n")
 
         try:
@@ -81,7 +81,7 @@ class Orchestrator:
                 print("[Step 1] 解析用户意图...")
                 parsed = self.engine.parse_intent(user_params['intent'])
                 dimensions = parsed['dimensions']
-                print(f"   ✓ 识别维度: {', '.join(dimensions)}")
+                print(f"   [OK] 识别维度: {', '.join(dimensions)}")
             else:
                 dimensions = user_params.get('dimensions', ['政策环境', '市场规模', '商业模式'])
                 print(f"[Step 1] 使用指定维度: {', '.join(dimensions)}")
@@ -90,7 +90,7 @@ class Orchestrator:
             print("\n[Step 2] 生成研究工作流...")
             workflow = self.engine.create_workflow(dimensions)
             total_time = sum(step['time'] for step in workflow)
-            print(f"   ✓ 工作流: {len(workflow)}个步骤, 预计 {total_time} 分钟")
+            print(f"   [OK] 工作流: {len(workflow)}个步骤, 预计 {total_time} 分钟")
             for step in workflow:
                 print(f"      - {step['name']} ({step['time']}分钟)")
 
@@ -112,18 +112,18 @@ class Orchestrator:
                 # 显示质量分数
                 score = result.get('quality_score', 0)
                 if score >= 0.7:
-                    print(f"✓ (质量: {score:.2f})")
+                    print(f"[OK] (质量: {score:.2f})")
                 else:
-                    print(f"⚠️  (质量: {score:.2f}, 偏低)")
+                    print(f"[WARN] (质量: {score:.2f}, 偏低)")
 
             # Step 4: 质量检查
             print(f"\n[Step 4] 质量检查...")
             quality_check = self.engine.check_quality(results)
             print(f"   平均质量分: {quality_check['avg_quality']:.2f}")
             if quality_check['passed']:
-                print(f"   ✓ 质量检查通过")
+                print(f"   [OK] 质量检查通过")
             else:
-                print(f"   ⚠️  质量问题: {', '.join(quality_check['issues'])}")
+                print(f"   [WARN] 质量问题: {', '.join(quality_check['issues'])}")
                 for suggestion in quality_check['suggestions']:
                     print(f"      建议: {suggestion}")
 
@@ -138,11 +138,11 @@ class Orchestrator:
             }
 
             report_path = self._generate_report(industry, report_data)
-            print(f"   ✓ 报告已生成: {report_path}")
+            print(f"   [OK] 报告已生成: {report_path}")
 
             # 返回结果
             print(f"\n{'='*60}")
-            print(f"✅ 研究完成!")
+            print(f"[SUCCESS] 研究完成!")
             print(f"{'='*60}\n")
 
             return {
@@ -157,7 +157,7 @@ class Orchestrator:
 
         except Exception as e:
             print(f"\n{'='*60}")
-            print(f"❌ 研究失败")
+            print(f"[ERROR] 研究失败")
             print(f"{'='*60}")
             print(f"错误: {type(e).__name__}: {str(e)}\n")
 
