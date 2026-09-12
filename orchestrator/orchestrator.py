@@ -44,16 +44,20 @@ class IndustryResearchOrchestrator:
         from execution.data_collector import DataCollector
         from execution.framework_applier import FrameworkApplier
         from execution.chart_generator import ChartGenerator
+        from execution.consulting_ai_analyzer import ConsultingAIAnalyzer
         from output.quality_checker import QualityChecker
         from output.report_generator import ReportGenerator
         from output.packaging import Packager
+        from output.professional_report_generator import ProfessionalReportGenerator
 
         self.framework_selector = FrameworkSelector()
         self.data_source_selector = DataSourceSelector()
         self.data_collector = DataCollector()
         self.framework_applier = FrameworkApplier()
+        self.ai_analyzer = ConsultingAIAnalyzer()  # 新增：AI分析引擎
         self.quality_checker = QualityChecker()
         self.report_generator = ReportGenerator()
+        self.professional_generator = ProfessionalReportGenerator()  # 新增：专业报告生成器
         self.packager = Packager()
 
     def run(self, industry_name, user_params=None):
@@ -101,7 +105,7 @@ class IndustryResearchOrchestrator:
 
         6个关键步骤:
         1. 数据收集
-        2. 框架分析
+        2. 框架分析 + AI深度分析
         3. 快速可视化
         4. 执行摘要
         5. 质量检查
@@ -124,21 +128,50 @@ class IndustryResearchOrchestrator:
         # 添加行业名称到collected_data，供后续框架分析使用
         collected_data['industry'] = industry
 
-        # Phase 2: 框架分析
-        print("\n[Phase 2/6] Framework Analysis...")
+        # Phase 2: 框架分析 + AI深度分析（集成）
+        print("\n[Phase 2/6] Framework Analysis + AI Deep Analysis...")
         frameworks = self.framework_selector.select_frameworks(industry)
         key_questions = self.framework_selector.get_key_questions(industry)
 
-        analysis = self.framework_applier.apply(frameworks, collected_data)
+        # 应用框架到数据
+        framework_analysis = self.framework_applier.apply(frameworks, collected_data)
 
         print(f"   Applied {len(frameworks)} frameworks")
         print(f"   Key questions: {len(key_questions)}")
+
+        # AI深度分析（集成ConsultingAIAnalyzer）
+        print("\n   [AI Deep Analysis] Running consulting-grade AI analysis...")
+
+        # 行业画像
+        profile = self.ai_analyzer._analyze_industry_profile(industry)
+
+        # 政策环境分析
+        policy = self.ai_analyzer._analyze_policy_environment(industry, collected_data)
+
+        # 市场规模测算
+        market = self.ai_analyzer._analyze_market_size(industry, collected_data)
+
+        # 商业模式分析
+        business_model = self.ai_analyzer._analyze_business_model(industry, collected_data)
+
+        # 合并AI分析结果到framework_analysis
+        framework_analysis['ai_insights'] = {
+            'profile': profile,
+            'policy': policy,
+            'market_size': market,
+            'business_model': business_model
+        }
+
+        print(f"   AI Analysis completed with quality scores:")
+        print(f"      Policy: {policy.get('quality_score', 0):.2f}")
+        print(f"      Market: {market.get('quality_score', 0):.2f}")
+        print(f"      Business Model: {business_model.get('quality_score', 0):.2f}")
 
         # Phase 3: 生成核心图表
         print("\n[Phase 3/6] Generating Core Charts...")
 
         # 准备图表数据（使用模拟数据作为示例）
-        chart_data = self._prepare_chart_data(industry, analysis, collected_data)
+        chart_data = self._prepare_chart_data(industry, framework_analysis, collected_data)
 
         from execution.chart_generator import ChartGenerator
         chart_generator = ChartGenerator(industry=industry)
@@ -148,18 +181,43 @@ class IndustryResearchOrchestrator:
         print(f"   Generated {chart_summary['count']} charts")
         print(f"   Total size: {chart_summary['total_size'] / 1024:.1f} KB")
 
-        # Phase 4: 生成执行摘要
-        print("\n[Phase 4/6] Generating Executive Summary...")
-        summary = self.report_generator.generate_executive_summary(
-            analysis,
-            max_pages=1
+        # Phase 4: 生成专业报告（使用ProfessionalReportGenerator）
+        print("\n[Phase 4/6] Generating Professional Report...")
+
+        # 准备研究数据
+        research_data = {
+            'profile': profile,
+            'analysis': {
+                'policy': policy,
+                'market_size': market,
+                'business_model': business_model
+            },
+            'frameworks': framework_analysis,
+            'charts': chart_paths
+        }
+
+        # 使用专业报告生成器
+        report_path = self.professional_generator.generate_report(
+            industry=industry,
+            research_data=research_data,
+            report_type='quick'
         )
-        print(f"   Summary: {summary['pages']} page(s)")
+
+        print(f"   Professional report generated: {report_path}")
 
         # Phase 5: 质量检查
         print("\n[Phase 5/6] Quality Check...")
+
+        # 质量检查包含AI分析结果
+        quality_data = {
+            'ai_analysis': framework_analysis.get('ai_insights', {}),
+            'framework_analysis': framework_analysis,
+            'charts': chart_paths,
+            'data_sources': collected_data.get('sources', [])
+        }
+
         issues = self.quality_checker.check_all(
-            summary,
+            quality_data,
             chart_paths,
             collected_data
         )
@@ -172,22 +230,27 @@ class IndustryResearchOrchestrator:
         # Phase 6: 打包交付
         print("\n[Phase 6/6] Packaging Deliverable...")
         deliverable = self.packager.package_quick_deliverable(
-            summary,
+            research_data,
             chart_paths,
             collected_data.get('sources', [])
         )
 
-        print(f"   Package: {deliverable.get('html_path', 'N/A')}")
+        print(f"   Package: {deliverable.get('html_path', report_path)}")
 
         return {
             'status': 'success',
             'mode': 'quick',
             'industry': industry,
-            'path': deliverable.get('html_path', ''),
+            'path': report_path,
             'charts': chart_summary['count'],
             'data_sources': len(collected_data.get('sources', [])),
             'tier1_coverage': collected_data.get('tier1_coverage', 0),
-            'quality_issues': len(issues)
+            'quality_issues': len(issues),
+            'ai_quality_avg': (
+                policy.get('quality_score', 0) +
+                market.get('quality_score', 0) +
+                business_model.get('quality_score', 0)
+            ) / 3
         }
 
     def _prepare_chart_data(self, industry, analysis, collected_data):
@@ -355,39 +418,59 @@ class IndustryResearchOrchestrator:
                 'note': 'User cancelled at data source confirmation'
             }
 
-        # Phase 2: 深度框架分析
-        print("\n[Phase 2/5] Deep Framework Analysis...")
+        # Phase 2: 深度框架分析 + AI深度分析（集成）
+        print("\n[Phase 2/5] Deep Framework Analysis + AI Deep Analysis...")
         frameworks = self.framework_selector.select_frameworks(industry)
         key_questions = self.framework_selector.get_key_questions(industry)
 
-        analysis = self.framework_applier.apply(frameworks, collected_data)
+        # 应用框架到数据
+        framework_analysis = self.framework_applier.apply(frameworks, collected_data)
 
         print(f"   Applied {len(frameworks)} frameworks")
         print(f"   Key questions: {len(key_questions)}")
 
-        # Phase 3: 完整图表生成（10+张）
-        print("\n[Phase 3/5] Generating All Charts...")
-        chart_data = self._prepare_chart_data(industry, analysis, collected_data)
+        # AI深度分析（全量模式包含所有维度）
+        print("\n   [AI Deep Analysis] Running full consulting-grade AI analysis...")
 
-        from execution.chart_generator import ChartGenerator
-        chart_generator = ChartGenerator(industry=industry)
-        chart_paths = chart_generator.generate_all_charts(chart_data)
+        # 行业画像
+        profile = self.ai_analyzer._analyze_industry_profile(industry)
 
-        chart_summary = chart_generator.get_chart_summary()
-        print(f"   Generated {chart_summary['count']} charts")
-        print(f"   Total size: {chart_summary['total_size'] / 1024:.1f} KB")
+        # 核心分析维度
+        policy = self.ai_analyzer._analyze_policy_environment(industry, collected_data)
+        market = self.ai_analyzer._analyze_market_size(industry, collected_data)
+        business_model = self.ai_analyzer._analyze_business_model(industry, collected_data)
 
-        # Phase 4: 完整报告生成（包含人工决策点2）
-        print("\n[Phase 4/5] Generating Full Report...")
-        full_report = self.report_generator.generate_full_report(
-            analysis,
-            chart_paths,
-            []  # insights待实现
-        )
+        # 扩展分析维度（全量模式独有）
+        competition = self.ai_analyzer._analyze_competition(industry, collected_data) if hasattr(self.ai_analyzer, '_analyze_competition') else None
+        entry_barriers = self.ai_analyzer._analyze_entry_barriers(industry, collected_data) if hasattr(self.ai_analyzer, '_analyze_entry_barriers') else None
+
+        # 合并AI分析结果
+        framework_analysis['ai_insights'] = {
+            'profile': profile,
+            'policy': policy,
+            'market_size': market,
+            'business_model': business_model
+        }
+
+        if competition:
+            framework_analysis['ai_insights']['competition'] = competition
+
+        if entry_barriers:
+            framework_analysis['ai_insights']['entry_barriers'] = entry_barriers
+
+        print(f"   AI Analysis completed with quality scores:")
+        print(f"      Policy: {policy.get('quality_score', 0):.2f}")
+        print(f"      Market: {market.get('quality_score', 0):.2f}")
+        print(f"      Business Model: {business_model.get('quality_score', 0):.2f}")
+        if competition:
+            print(f"      Competition: {competition.get('quality_score', 0):.2f}")
+        if entry_barriers:
+            print(f"      Entry Barriers: {entry_barriers.get('quality_score', 0):.2f}")
 
         # 人工决策点2：洞察深度自检
         print("\n[Decision Point 2/3] Insight Depth Review")
-        print(f"   Report sections: {len(full_report.get('sections', {}))}")
+        print(f"   Framework analysis sections: {len(framework_analysis.get('frameworks', {}))}")
+        print(f"   AI insights dimensions: {len(framework_analysis.get('ai_insights', {}))}")
         print("   [INFO] Review insights depth and approve to continue")
         # TODO: 实现人工确认机制
         user_approved = True
@@ -400,10 +483,60 @@ class IndustryResearchOrchestrator:
                 'note': 'User cancelled at insight depth review'
             }
 
+        # Phase 3: 完整图表生成（10+张）
+        print("\n[Phase 3/5] Generating All Charts...")
+        chart_data = self._prepare_chart_data(industry, framework_analysis, collected_data)
+
+        from execution.chart_generator import ChartGenerator
+        chart_generator = ChartGenerator(industry=industry)
+        chart_paths = chart_generator.generate_all_charts(chart_data)
+
+        chart_summary = chart_generator.get_chart_summary()
+        print(f"   Generated {chart_summary['count']} charts")
+        print(f"   Total size: {chart_summary['total_size'] / 1024:.1f} KB")
+
+        # Phase 4: 完整专业报告生成
+        print("\n[Phase 4/5] Generating Full Professional Report...")
+
+        # 准备研究数据
+        research_data = {
+            'profile': profile,
+            'analysis': {
+                'policy': policy,
+                'market_size': market,
+                'business_model': business_model
+            },
+            'frameworks': framework_analysis,
+            'charts': chart_paths
+        }
+
+        if competition:
+            research_data['analysis']['competition'] = competition
+
+        if entry_barriers:
+            research_data['analysis']['entry_barriers'] = entry_barriers
+
+        # 使用专业报告生成器
+        report_path = self.professional_generator.generate_report(
+            industry=industry,
+            research_data=research_data,
+            report_type='full'
+        )
+
+        print(f"   Professional report generated: {report_path}")
+
         # Phase 5: 质量检查和打包（包含人工决策点3）
         print("\n[Phase 5/5] Quality Check and Packaging...")
+
+        quality_data = {
+            'ai_analysis': framework_analysis.get('ai_insights', {}),
+            'framework_analysis': framework_analysis,
+            'charts': chart_paths,
+            'data_sources': collected_data.get('sources', [])
+        }
+
         issues = self.quality_checker.check_all(
-            full_report,
+            quality_data,
             chart_paths,
             collected_data
         )
@@ -431,23 +564,39 @@ class IndustryResearchOrchestrator:
 
         # 打包交付
         deliverable = self.packager.package_full_deliverable(
-            full_report,
+            research_data,
             chart_paths,
             collected_data.get('sources', [])
         )
 
-        print(f"   Package: {deliverable['path']}")
+        print(f"   Package: {deliverable.get('path', report_path)}")
+
+        # 计算AI平均质量分数
+        ai_scores = [
+            policy.get('quality_score', 0),
+            market.get('quality_score', 0),
+            business_model.get('quality_score', 0)
+        ]
+
+        if competition:
+            ai_scores.append(competition.get('quality_score', 0))
+
+        if entry_barriers:
+            ai_scores.append(entry_barriers.get('quality_score', 0))
+
+        avg_quality = sum(ai_scores) / len(ai_scores)
 
         return {
             'status': 'success',
             'mode': 'full',
             'industry': industry,
-            'path': deliverable['path'],
+            'path': report_path,
             'charts': chart_summary['count'],
             'data_sources': len(collected_data.get('sources', [])),
             'tier1_coverage': collected_data.get('tier1_coverage', 0),
             'quality_issues': len(issues),
-            'report_sections': len(full_report.get('sections', {}))
+            'report_sections': len(framework_analysis.get('frameworks', {})),
+            'ai_quality_avg': avg_quality
         }
 
 
