@@ -1,55 +1,67 @@
 ---
 name: industry-research
 description: AI驱动的咨询级行业研究 - 分析行业时自动调用
-version: 1.0.0
-author: Refactored 2026-09-12
+version: 1.1.0
+author: Universal Agent Compatible (2026-09-12)
 ---
 
 # Industry Research Skill
 
-当用户询问行业研究相关问题时，自动调用此Skill生成专业分析报告。
+当用户询问行业研究相关问题时，任何AI Agent都可以调用此Skill生成专业分析报告。
 
-## 触发场景
+**兼容的AI Agent**：
+- Claude / Claude Code
+- WorkBuddy / 公司内部Agent
+- Codex / GitHub Copilot
+- 任何支持subprocess的AI Agent
 
-以下场景自动触发：
+## 触发场景（通用）
+
+以下场景自动触发（不限AI平台）：
 - 用户说"帮我研究【行业名】"
 - 用户说"分析【行业名】行业"
 - 用户说"【行业名】市场怎么样"
 - 用户询问行业政策、竞争、商业模式等
 
-## 调用方式
+## 调用方式（通用）
+
+### 基本调用格式
+```bash
+cd /path/to/industry-research-skill
+python irs.py "<行业名>" [可选参数]
+```
 
 ### 对话示例1：简单调用
 ```
 用户：帮我研究医疗陪护行业
 
-Claude执行：
+AI Agent执行：
 cd /path/to/industry-research-skill
 python irs.py "医疗陪护"
 
-输出报告路径给用户
+返回：报告路径
 ```
 
 ### 对话示例2：指定重点
 ```
 用户：帮我研究AI芯片，重点看政策和竞争
 
-Claude执行：
+AI Agent执行：
 cd /path/to/industry-research-skill
 python irs.py "AI芯片" --intent "重点看政策和竞争"
 
-输出报告路径给用户
+返回：报告路径
 ```
 
 ### 对话示例3：精确指定维度
 ```
 用户：分析智能陪护机器人的政策环境、进入壁垒和风险
 
-Claude执行：
+AI Agent执行：
 cd /path/to/industry-research-skill
 python irs.py "智能陪护机器人" --dimensions 政策环境,进入壁垒,风险分析
 
-输出报告路径给用户
+返回：报告路径
 ```
 
 ## 技术实现
@@ -70,7 +82,7 @@ python irs.py "智能陪护机器人" --dimensions 政策环境,进入壁垒,风
 
 ### 意图理解关键词
 
-Claude应该识别这些关键词并转换为dimensions参数：
+AI Agent应该识别这些关键词并转换为dimensions参数：
 
 | 用户说 | dimensions参数 |
 |-------|---------------|
@@ -198,7 +210,7 @@ cd /path/to/industry-research-skill
 
 ### 自建MCP数据源（可选）
 
-Skill默认使用Claude的Web搜索能力，已足够大部分场景。
+Skill默认使用AI Agent的Web搜索能力，已足够大部分场景。
 
 **何时需要自建MCP？**
 - 有付费数据订阅（Wind、企查查、Bloomberg）
@@ -217,7 +229,7 @@ Skill默认使用Claude的Web搜索能力，已足够大部分场景。
 ```
 用户对话
   ↓
-Claude识别触发词
+AI Agent识别触发词
   ↓
 执行: python irs.py "行业" [--intent "意图" | --dimensions 维度列表]
   ↓
@@ -249,12 +261,12 @@ core/research_engine.py (AI引擎)
 
 ---
 
-## Claude调用示例（完整流程）
+## AI Agent调用示例（完整流程）
 
 ### 示例1：用户说"帮我研究医疗陪护"
 
 ```python
-# Claude内部执行（自动）
+# AI Agent内部执行（自动）
 import subprocess
 import os
 
@@ -278,7 +290,7 @@ print(f"✓ 行业研究完成！\n报告路径: {report_path}")
 ### 示例2：用户说"研究AI芯片，重点看政策和竞争"
 
 ```python
-# Claude内部执行（自动）
+# AI Agent内部执行（自动）
 os.chdir('/path/to/industry-research-skill')
 
 result = subprocess.run(

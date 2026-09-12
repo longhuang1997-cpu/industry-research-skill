@@ -2,9 +2,10 @@
 
 > **AI驱动的行业研究工具** - 用咨询公司标准快速生成行业洞察
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/longhuang1997-cpu/industry-research-skill)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/longhuang1997-cpu/industry-research-skill)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+[![Universal Agent](https://img.shields.io/badge/agent-universal-purple.svg)](skill.md)
 
 ---
 
@@ -13,11 +14,17 @@
 **Industry Research Skill** 能够在10-40分钟内，生成一份咨询公司水准的行业研究报告。
 
 **怎么用？**
-在Claude对话中说：
+在任何AI Agent对话中说：
 ```
 帮我研究【你的行业】
 ```
 就这么简单！
+
+**支持的AI Agent**：
+- ✅ Claude / Claude Code
+- ✅ WorkBuddy / 公司内部Agent
+- ✅ Codex / GitHub Copilot
+- ✅ 任何支持subprocess的AI Agent
 
 **适合谁用？**
 - 📊 **投资人** - 快速了解目标行业，辅助投资决策
@@ -52,7 +59,7 @@
 
 ### 最简单的方式：对话调用（推荐）✨
 
-**在Claude对话中直接说**：
+**在任何AI Agent对话中直接说**：
 ```
 帮我研究医疗陪护行业
 ```
@@ -62,7 +69,7 @@
 帮我研究医疗陪护，重点看政策和竞争，快速版
 ```
 
-**就这么简单！** Claude会自动调用Skill生成报告。
+**就这么简单！** AI Agent会自动调用Skill生成报告。
 
 ---
 
@@ -88,10 +95,10 @@ export ANTHROPIC_API_KEY="your-api-key"
 api_key: "your-api-key"
 ```
 
-#### 步骤4：安装到Claude
-将`skill.md`文件放到Claude的skills目录（具体路径参考Claude文档）
+#### 步骤4：安装到AI Agent
+将`skill.md`文件放到AI Agent的skills目录（具体路径参考各Agent文档）
 
-**安装后**，在任何Claude对话中说"帮我研究XX行业"即可使用。
+**安装后**，在任何AI Agent对话中说"帮我研究XX行业"即可使用。
 
 ---
 
@@ -136,13 +143,13 @@ python irs.py "医疗陪护" --mode full
 
 ## 💡 使用场景
 
-### 在Claude对话中直接使用
+### 在AI Agent对话中直接使用
 
 #### 场景1：投资尽调
 ```
 你：帮我研究AI芯片行业，投资视角，重点看市场规模和竞争格局
 
-Claude：[调用Industry Research Skill]
+AI Agent：[调用Industry Research Skill]
 正在分析...
 已生成报告：AI芯片行业研究报告.html
 - 市场容量：2024年约500亿美元，CAGR 25%
@@ -154,7 +161,7 @@ Claude：[调用Industry Research Skill]
 ```
 你：我想做智能陪护机器人，帮我评估市场进入的可行性
 
-Claude：[调用Industry Research Skill]
+AI Agent：[调用Industry Research Skill]
 正在分析政策环境、进入壁垒、风险...
 已生成评估报告
 - 政策支持度：★★★★☆（国家养老政策支持）
@@ -167,7 +174,7 @@ Claude：[调用Industry Research Skill]
 ```
 你：上门护理服务的商业模式能跑通吗？帮我算算账
 
-Claude：[调用Industry Research Skill]
+AI Agent：[调用Industry Research Skill]
 正在分析商业模式、市场规模、竞争格局...
 已生成分析报告
 - 单位经济：客单价300元，毛利率40%
@@ -182,12 +189,12 @@ Claude：[调用Industry Research Skill]
 
 ### 对于普通用户（推荐）
 
-**直接在Claude对话中说**：
+**直接在AI Agent对话中说**：
 ```
 帮我研究【你的行业】
 ```
 
-就这么简单！Claude会自动调用这个Skill。
+就这么简单！AI Agent会自动调用这个Skill。
 
 ### 对于开发者（安装Skill）
 
@@ -197,7 +204,7 @@ Claude：[调用Industry Research Skill]
 # 1. 克隆Skill
 git clone https://github.com/longhuang1997-cpu/industry-research-skill.git
 
-# 2. 安装到Claude
+# 2. 安装到AI Agent
 # (具体步骤参考skill.md)
 
 # 3. 配置API
@@ -296,7 +303,7 @@ mcp/
 
 参考：`mcp/README.md`
 
-**注意**：工具默认使用Claude的Web搜索能力，大部分场景已足够。
+**注意**：工具默认使用AI Agent的Web搜索能力，大部分场景已足够。
 
 ---
 
@@ -328,7 +335,7 @@ MIT License - 可自由使用、修改和商业化
 ## ❓ 常见问题
 
 ### Q: 需要什么样的API？
-A: Claude API（Sonnet或Opus模型），支持Anthropic官方API和兼容接口。
+A: 任何兼容Anthropic API的服务（Claude API官方或兼容接口）。支持Sonnet或Opus模型。
 
 ### Q: 分析质量如何？
 A: 使用咨询公司的分析框架，包含具体数字和案例。质量分≥0.7的分析通过验证。
@@ -342,6 +349,15 @@ A: 完全支持中文输入和输出，也支持英文。
 ### Q: 需要多久？
 A: 快速模式10-20分钟，全量模式40-60分钟，取决于选择的维度数量。
 
+### Q: 支持哪些AI Agent？
+A: 支持Claude、WorkBuddy、Codex等任何能调用subprocess的AI Agent。通用设计，无平台锁定。
+
 ---
 
 **用AI推理替代脚本复杂度 - 让行业研究更简单！** 🚀
+
+**v1.1.0 更新（2026-09-12）**：
+- ✅ 去除平台硬编码，支持任何AI Agent调用
+- ✅ 统一调用接口，跨平台兼容
+- ✅ 删除空壳MCP，简化架构
+- ✅ 集成意图解析到主流程
