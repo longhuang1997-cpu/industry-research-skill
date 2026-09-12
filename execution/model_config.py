@@ -151,10 +151,19 @@ class ModelConfigManager:
                 with open(settings_path, 'r', encoding='utf-8') as f:
                     settings = json.load(f)
                     env = settings.get('env', {})
+
+                    # 优先使用当前会话的模型（settings.json中的model字段）
+                    # 这样用户切换模型时，skill会自动跟随
+                    current_model = settings.get('model')
+
+                    # 如果model包含特殊标记（如[1m]），提取基础模型名
+                    if current_model and '[' in current_model:
+                        current_model = current_model.split('[')[0]
+
                     return {
                         'api_key': env.get('ANTHROPIC_AUTH_TOKEN'),
                         'base_url': env.get('ANTHROPIC_BASE_URL'),
-                        'model': env.get('ANTHROPIC_MODEL')
+                        'model': current_model or env.get('ANTHROPIC_MODEL')
                     }
         except Exception:
             pass
