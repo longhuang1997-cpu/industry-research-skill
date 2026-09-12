@@ -73,14 +73,87 @@ class IndustryResearchOrchestrator:
         """
         print(f"\n[Orchestrator] Starting research for: {industry_name}")
 
-        # Step 1: 收集需求
-        research_brief = self._collect_requirements(industry_name, user_params)
+        try:
+            # Step 1: 收集需求
+            research_brief = self._collect_requirements(industry_name, user_params)
 
-        # Step 2: 根据模式执行
-        if self.mode == 'quick':
-            return self._run_quick_mode(research_brief)
-        else:
-            return self._run_full_mode(research_brief)
+            # Step 2: 根据模式执行
+            if self.mode == 'quick':
+                return self._run_quick_mode(research_brief)
+            else:
+                return self._run_full_mode(research_brief)
+
+        except Exception as e:
+            # P1.2: 友好的错误处理
+            print("\n" + "="*60)
+            print("❌ 研究过程中遇到问题")
+            print("="*60)
+            print(f"\n错误类型: {type(e).__name__}")
+            print(f"错误信息: {str(e)}\n")
+
+            # 根据错误类型给出建议
+            error_suggestions = self._get_error_suggestions(e)
+            if error_suggestions:
+                print("💡 可能的解决方案:")
+                for i, suggestion in enumerate(error_suggestions, 1):
+                    print(f"   {i}. {suggestion}")
+
+            print("\n📝 详细错误信息已记录，请稍后重试或联系支持")
+            print("="*60)
+
+            return {
+                'status': 'failed',
+                'mode': self.mode,
+                'industry': industry_name,
+                'error': str(e),
+                'error_type': type(e).__name__,
+                'suggestions': error_suggestions
+            }
+
+    def _get_error_suggestions(self, error):
+        """
+        根据错误类型提供解决建议
+
+        Args:
+            error: 异常对象
+
+        Returns:
+            suggestions: 建议列表
+        """
+        error_type = type(error).__name__
+        error_msg = str(error).lower()
+
+        suggestions = []
+
+        # API相关错误
+        if 'api' in error_msg or 'anthropic' in error_msg or 'openai' in error_msg:
+            suggestions.append("检查API密钥配置是否正确（skill_config.yaml）")
+            suggestions.append("确认API服务可访问（网络连接正常）")
+            suggestions.append("检查API配额是否充足")
+
+        # 网络相关错误
+        if 'connection' in error_msg or 'timeout' in error_msg or 'network' in error_msg:
+            suggestions.append("检查网络连接是否正常")
+            suggestions.append("尝试使用VPN或更换网络环境")
+            suggestions.append("增加超时时间设置")
+
+        # 文件相关错误
+        if 'file' in error_msg or 'directory' in error_msg or 'path' in error_msg:
+            suggestions.append("检查output目录是否存在且有写入权限")
+            suggestions.append("确认磁盘空间充足")
+
+        # 模型相关错误
+        if 'model' in error_msg or 'claude' in error_msg:
+            suggestions.append("检查skill_config.yaml中的model配置")
+            suggestions.append("尝试使用其他可用模型")
+
+        # 通用建议
+        if not suggestions:
+            suggestions.append("重试一次（可能是临时性问题）")
+            suggestions.append("检查skill_config.yaml配置是否正确")
+            suggestions.append("查看完整错误日志以获取更多信息")
+
+        return suggestions
 
     def _collect_requirements(self, industry_name, user_params):
         """
@@ -312,11 +385,18 @@ class IndustryResearchOrchestrator:
         print("2. 询问报告中的具体内容（如：竞争格局怎么样？）")
         print("3. 对比其他行业或深入某个维度")
 
+        # P1.1: 保存分析内容到上下文文件，供后续查询
+        context_file = self.skill_root / "output" / f"{industry}_context.md"
+        self._save_context_for_followup(industry, profile, policy, market, business_model, context_file)
+
+        print(f"\n📝 分析内容已保存，您现在可以直接询问报告中的任何问题")
+
         return {
             'status': 'success',
             'mode': 'quick',
             'industry': industry,
             'path': report_path,
+            'context_file': str(context_file),  # 添加上下文文件路径
             'charts': chart_summary['count'],
             'data_sources': len(collected_data.get('sources', [])),
             'tier1_coverage': collected_data.get('tier1_coverage', 0),
@@ -334,6 +414,86 @@ class IndustryResearchOrchestrator:
                 'business_model': business_model
             }
         }
+
+    def _save_context_for_followup(self, industry, profile, policy, market, business_model, context_file):
+        """
+        保存分析内容到markdown文件，供后续对话查询
+
+        Args:
+            industry: 行业名称
+            profile: 行业画像
+            policy: 政策分析
+            market: 市场分析
+            business_model: 商业模式分析
+            context_file: 输出文件路径
+        """
+        content = f"""# {industry} 行业研究分析内容
+
+> 本文件包含完整的行业研究分析内容，供后续对话查询使用
+
+---
+
+## 🎯 行业画像
+
+{profile.get('summary', '暂无数据')}
+
+**详细分析**：
+{profile.get('content', '暂无数据') if 'content' in profile else profile.get('summary', '暂无数据')}
+
+---
+
+## 📋 政策环境分析
+
+**质量分数**: {policy.get('quality_score', 0):.2f}/1.00
+
+**核心发现**：
+{policy.get('content', '暂无数据')}
+
+**数据来源**：
+{', '.join(policy.get('sources', ['AI分析生成']))}
+
+---
+
+## 💰 市场规模分析
+
+**质量分数**: {market.get('quality_score', 0):.2f}/1.00
+
+**核心发现**：
+{market.get('content', '暂无数据')}
+
+**数据来源**：
+{', '.join(market.get('sources', ['AI分析生成']))}
+
+---
+
+## 💡 商业模式分析
+
+**质量分数**: {business_model.get('quality_score', 0):.2f}/1.00
+
+**核心发现**：
+{business_model.get('content', '暂无数据')}
+
+**数据来源**：
+{', '.join(business_model.get('sources', ['AI分析生成']))}
+
+---
+
+## 💬 如何使用本文件
+
+您现在可以直接询问关于{industry}行业的问题，例如：
+- "政策环境的核心要点是什么？"
+- "市场规模有多大？增长率如何？"
+- "商业模式的核心是什么？"
+- "单位经济模型如何？"
+
+我会基于上述分析内容回答您的问题。
+"""
+
+        # 写入文件
+        with open(context_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+        print(f"   ✓ 上下文已保存到: {context_file}")
 
     def _prepare_chart_data(self, industry, analysis, collected_data):
         """

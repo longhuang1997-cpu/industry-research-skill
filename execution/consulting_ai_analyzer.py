@@ -351,19 +351,41 @@ Bottom-up验证：头部企业（小鸟慧医）年营收约8亿元，市占率�
 
             client = anthropic.Anthropic(**client_kwargs)
 
-            message = client.messages.create(
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                messages=[{"role": "user", "content": prompt}]
-            )
+            # P1.2: 自动重试机制（最多3次）
+            max_retries = 3
+            last_error = None
 
-            # 处理响应：找到TextBlock（跳过ThinkingBlock）
-            for block in message.content:
-                if hasattr(block, 'text'):
-                    return block.text.strip()
+            for attempt in range(max_retries):
+                try:
+                    message = client.messages.create(
+                        model=self.model,
+                        max_tokens=self.max_tokens,
+                        temperature=self.temperature,
+                        messages=[{"role": "user", "content": prompt}]
+                    )
 
-            # 如果没有找到文本块，返回空字符串
+                    # 处理响应：找到TextBlock（跳过ThinkingBlock）
+                    for block in message.content:
+                        if hasattr(block, 'text'):
+                            return block.text.strip()
+
+                    # 如果没有找到文本块，返回空字符串
+                    return ""
+
+                except Exception as api_error:
+                    last_error = api_error
+                    if attempt < max_retries - 1:
+                        print(f"   ⚠️  API调用失败，正在重试 ({attempt + 1}/{max_retries})...")
+                        import time
+                        time.sleep(2 ** attempt)  # 指数退避：2秒、4秒
+                    else:
+                        # 最后一次重试也失败，抛出错误
+                        raise
+
+            # 如果所有重试都失败，抛出最后一个错误
+            if last_error:
+                raise last_error
+
             return ""
 
         except ImportError:
