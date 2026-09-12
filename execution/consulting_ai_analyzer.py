@@ -145,6 +145,8 @@ class ConsultingAIAnalyzer:
                 'quality_score': self._assess_quality(conclusion)
             }
         except Exception as e:
+            # 打印详细错误信息用于调试
+            print(f"\n⚠️ API调用失败: {type(e).__name__}: {str(e)}")
             # Fallback到高质量模板
             return self._policy_fallback(industry)
 
@@ -197,6 +199,7 @@ Bottom-up验证：头部企业（小鸟慧医）年营收约8亿元，市占率�
                 'quality_score': self._assess_quality(conclusion)
             }
         except Exception as e:
+            print(f"\n⚠️ API调用失败(市场规模): {type(e).__name__}: {str(e)}")
             return self._market_size_fallback(industry)
 
     def _analyze_business_model(self, industry: str, context: Dict) -> Dict:
@@ -255,6 +258,7 @@ Bottom-up验证：头部企业（小鸟慧医）年营收约8亿元，市占率�
                 'quality_score': self._assess_quality(conclusion)
             }
         except Exception as e:
+            print(f"\n⚠️ API调用失败(商业模式): {type(e).__name__}: {str(e)}")
             return self._business_model_fallback(industry)
 
     def _analyze_industry_profile(self, industry: str) -> Dict:
@@ -350,13 +354,12 @@ Bottom-up验证：头部企业（小鸟慧医）年营收约8亿元，市占率�
         try:
             import anthropic
 
+            # 构建client参数
+            client_kwargs = {"api_key": self.api_key}
             if self.base_url:
-                client = anthropic.Anthropic(
-                    api_key=self.api_key,
-                    base_url=self.base_url
-                )
-            else:
-                client = anthropic.Anthropic(api_key=self.api_key)
+                client_kwargs["base_url"] = self.base_url
+
+            client = anthropic.Anthropic(**client_kwargs)
 
             message = client.messages.create(
                 model=self.model,
@@ -369,6 +372,10 @@ Bottom-up验证：头部企业（小鸟慧医）年营收约8亿元，市占率�
 
         except ImportError:
             raise ImportError("需要安装anthropic包: pip install anthropic")
+        except Exception as e:
+            # 打印具体错误信息，方便调试
+            print(f"API调用错误: {str(e)}")
+            raise
 
     def _assess_quality(self, content: str) -> float:
         """
