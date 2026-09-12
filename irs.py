@@ -12,8 +12,47 @@ SKILL_ROOT = Path(__file__).parent
 sys.path.insert(0, str(SKILL_ROOT))
 
 
+def run_research(industry, user_params=None):
+    """
+    运行行业研究（可被外部调用）
+
+    Args:
+        industry: 行业名称
+        user_params: 用户参数字典（可选）
+            - dimensions: List[str] - 分析维度列表
+            - depth: str - 研究深度
+            - web_search: bool - 是否联网搜索
+            - perspective: str - 分析视角
+
+    Returns:
+        result: 研究结果字典
+    """
+    from orchestrator.orchestrator import IndustryResearchOrchestrator
+
+    # 默认参数
+    if user_params is None:
+        user_params = {}
+
+    # 设置默认值
+    user_params.setdefault('industry', industry)
+    user_params.setdefault('web_search', True)
+    user_params.setdefault('mode', 'quick')
+
+    # 创建orchestrator
+    mode = user_params.get('mode', 'quick')
+    orchestrator = IndustryResearchOrchestrator(mode=mode)
+
+    # 执行研究
+    result = orchestrator.run(
+        industry_name=industry,
+        user_params=user_params
+    )
+
+    return result
+
+
 def main():
-    """主函数 - 使用orchestrator作为主控"""
+    """主函数 - CLI入口"""
     if len(sys.argv) < 2:
         print("╔════════════════════════════════════════════════════════════╗")
         print("║  Industry Research Skill - AI驱动的行业研究工具            ║")
@@ -70,11 +109,6 @@ def main():
     if '--interactive' in sys.argv:
         mode = 'full'
 
-    # 调用orchestrator作为主控
-    from orchestrator.orchestrator import IndustryResearchOrchestrator
-
-    orchestrator = IndustryResearchOrchestrator(mode=mode)
-
     # 构建用户参数
     user_params = {
         'industry': industry,
@@ -88,10 +122,8 @@ def main():
     if depth:
         user_params['depth'] = depth
 
-    result = orchestrator.run(
-        industry_name=industry,
-        user_params=user_params
-    )
+    # 调用研究函数
+    result = run_research(industry, user_params)
 
     # 输出结果
     print("\n" + "="*60)
