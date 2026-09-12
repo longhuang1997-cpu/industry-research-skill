@@ -121,6 +121,9 @@ class IndustryResearchOrchestrator:
             data_source_selector=self.data_source_selector
         )
 
+        # 添加行业名称到collected_data，供后续框架分析使用
+        collected_data['industry'] = industry
+
         # Phase 2: 框架分析
         print("\n[Phase 2/6] Framework Analysis...")
         frameworks = self.framework_selector.select_frameworks(industry)
