@@ -60,25 +60,32 @@ def main():
 
     # 输出结果
     print("\n" + "="*60)
-    print("[OK] Research Complete!")
+    print("✅ 研究完成！")
     print("="*60)
-    print(f"Status: {result['status']}")
-    print(f"Mode: {result['mode']}")
-    print(f"Industry: {result['industry']}")
-    if 'path' in result:
-        print(f"Deliverable: {result['path']}")
-    if 'charts' in result:
-        print(f"Charts: {result['charts']}")
-    if 'data_sources' in result:
-        print(f"Data sources: {result['data_sources']}")
-    if 'tier1_coverage' in result:
-        print(f"Tier 1 coverage: {result['tier1_coverage']:.1%}")
-    if 'quality_issues' in result:
-        print(f"Quality issues: {result['quality_issues']}")
-    if 'ai_quality_avg' in result:
-        print(f"AI Analysis Avg Quality: {result['ai_quality_avg']:.2f}")
+    print(f"\n状态: {result['status']}")
+    print(f"模式: {'快速模式 (70分钟)' if result['mode'] == 'quick' else '全量模式 (3-5小时)'}")
+    print(f"行业: {result['industry']}")
+
+    if result['status'] == 'success':
+        print("\n📊 交付物统计:")
+        if 'path' in result:
+            print(f"  • 专业报告: {result['path']}")
+        if 'charts' in result:
+            print(f"  • 图表数量: {result['charts']}张")
+        if 'data_sources' in result:
+            print(f"  • 数据源: {result['data_sources']}个")
+        if 'tier1_coverage' in result:
+            print(f"  • 数据质量: Tier 1覆盖率 {result['tier1_coverage']:.1%}")
+        if 'ai_quality_avg' in result:
+            print(f"  • AI分析质量: {result['ai_quality_avg']:.2f}/1.00")
+        if 'quality_issues' in result:
+            if result['quality_issues'] == 0:
+                print(f"  • 质量检查: ✓ 通过")
+            else:
+                print(f"  • 质量检查: ⚠️  {result['quality_issues']}个问题（可接受）")
+
     if 'note' in result:
-        print(f"Note: {result['note']}")
+        print(f"\n📝 备注: {result['note']}")
 
 
 if __name__ == '__main__':

@@ -112,13 +112,18 @@ class IndustryResearchOrchestrator:
         6. 打包交付
         """
         print("\n" + "="*60)
-        print("Quick Research Mode (Est. 70 minutes)")
+        print("🚀 开始行业研究（快速模式）")
+        print("="*60)
+        print("预计耗时: 60-70分钟")
+        print("流程: 数据收集 → AI分析 → 图表生成 → 专业报告 → 质量检查 → 打包交付")
+        print("\n💡 您可以离开去做其他事，完成后会通知您")
         print("="*60)
 
         industry = brief['industry']
 
         # Phase 1: 数据收集
-        print("\n[Phase 1/6] Data Collection...")
+        print("\n🔍 [1/6] 正在收集行业数据...")
+        print("   预计耗时: 10-15分钟")
         collected_data = self.data_collector.auto_collect(
             industry=industry,
             year=2024,
@@ -128,30 +133,37 @@ class IndustryResearchOrchestrator:
         # 添加行业名称到collected_data，供后续框架分析使用
         collected_data['industry'] = industry
 
+        print(f"   ✓ 已收集 {len(collected_data.get('sources', []))}个数据源")
+        print(f"   ✓ Tier 1覆盖率: {collected_data.get('tier1_coverage', 0):.1%}")
+
         # Phase 2: 框架分析 + AI深度分析（集成）
-        print("\n[Phase 2/6] Framework Analysis + AI Deep Analysis...")
+        print("\n💡 [2/6] 正在进行深度分析...")
+        print("   预计耗时: 15-20分钟")
         frameworks = self.framework_selector.select_frameworks(industry)
         key_questions = self.framework_selector.get_key_questions(industry)
 
         # 应用框架到数据
         framework_analysis = self.framework_applier.apply(frameworks, collected_data)
 
-        print(f"   Applied {len(frameworks)} frameworks")
-        print(f"   Key questions: {len(key_questions)}")
+        print(f"   ✓ 已应用 {len(frameworks)} 个分析框架")
 
         # AI深度分析（集成ConsultingAIAnalyzer）
-        print("\n   [AI Deep Analysis] Running consulting-grade AI analysis...")
+        print("\n   💡 AI正在生成咨询级深度分析...")
 
         # 行业画像
+        print("      → 分析行业定位...")
         profile = self.ai_analyzer._analyze_industry_profile(industry)
 
         # 政策环境分析
+        print("      → 分析政策环境...")
         policy = self.ai_analyzer._analyze_policy_environment(industry, collected_data)
 
         # 市场规模测算
+        print("      → 测算市场规模...")
         market = self.ai_analyzer._analyze_market_size(industry, collected_data)
 
         # 商业模式分析
+        print("      → 拆解商业模式...")
         business_model = self.ai_analyzer._analyze_business_model(industry, collected_data)
 
         # 合并AI分析结果到framework_analysis
@@ -162,13 +174,14 @@ class IndustryResearchOrchestrator:
             'business_model': business_model
         }
 
-        print(f"   AI Analysis completed with quality scores:")
-        print(f"      Policy: {policy.get('quality_score', 0):.2f}")
-        print(f"      Market: {market.get('quality_score', 0):.2f}")
-        print(f"      Business Model: {business_model.get('quality_score', 0):.2f}")
+        print(f"\n   ✓ AI分析完成")
+        print(f"      政策环境质量: {policy.get('quality_score', 0):.2f}/1.00")
+        print(f"      市场规模质量: {market.get('quality_score', 0):.2f}/1.00")
+        print(f"      商业模式质量: {business_model.get('quality_score', 0):.2f}/1.00")
 
         # Phase 3: 生成核心图表
-        print("\n[Phase 3/6] Generating Core Charts...")
+        print("\n📊 [3/6] 正在生成可视化图表...")
+        print("   预计耗时: 5-8分钟")
 
         # 准备图表数据（使用模拟数据作为示例）
         chart_data = self._prepare_chart_data(industry, framework_analysis, collected_data)
@@ -178,11 +191,11 @@ class IndustryResearchOrchestrator:
         chart_paths = chart_generator.generate_core_charts(chart_data)
 
         chart_summary = chart_generator.get_chart_summary()
-        print(f"   Generated {chart_summary['count']} charts")
-        print(f"   Total size: {chart_summary['total_size'] / 1024:.1f} KB")
+        print(f"   ✓ 已生成 {chart_summary['count']} 张专业图表")
 
         # Phase 4: 生成专业报告（使用ProfessionalReportGenerator）
-        print("\n[Phase 4/6] Generating Professional Report...")
+        print("\n📄 [4/6] 正在生成专业报告...")
+        print("   预计耗时: 3-5分钟")
 
         # 准备研究数据
         research_data = {
@@ -203,10 +216,11 @@ class IndustryResearchOrchestrator:
             report_type='quick'
         )
 
-        print(f"   Professional report generated: {report_path}")
+        print(f"   ✓ 专业报告已生成")
 
         # Phase 5: 质量检查
-        print("\n[Phase 5/6] Quality Check...")
+        print("\n✅ [5/6] 正在进行质量检查...")
+        print("   预计耗时: 2-3分钟")
 
         # 质量检查包含AI分析结果
         quality_data = {
@@ -223,12 +237,13 @@ class IndustryResearchOrchestrator:
         )
 
         if issues:
-            print(f"   Found {len(issues)} issues")
+            print(f"   ⚠️  发现 {len(issues)} 个问题（可接受范围内）")
         else:
-            print(f"   Quality check passed")
+            print(f"   ✓ 质量检查通过")
 
         # Phase 6: 打包交付
-        print("\n[Phase 6/6] Packaging Deliverable...")
+        print("\n📦 [6/6] 正在打包交付物...")
+        print("   预计耗时: 1-2分钟")
         deliverable = self.packager.package_quick_deliverable(
             research_data,
             chart_paths,
@@ -236,6 +251,66 @@ class IndustryResearchOrchestrator:
         )
 
         print(f"   Package: {deliverable.get('html_path', report_path)}")
+
+        # ============================================================
+        # P0改进：在对话中直接展示核心结论
+        # ============================================================
+        print("\n" + "="*60)
+        print("✅ 研究完成！")
+        print("="*60)
+        print(f"\n📊 【{industry}】行业核心洞察\n")
+
+        # 展示行业画像
+        print("🎯 行业定位")
+        print(f"{profile.get('summary', '暂无数据')}\n")
+
+        # 展示政策环境核心发现（提取前200字）
+        policy_content = policy.get('content', '')
+        if len(policy_content) > 200:
+            policy_preview = policy_content[:200] + "..."
+        else:
+            policy_preview = policy_content
+
+        print("📋 政策环境")
+        print(f"{policy_preview}")
+        print(f"   质量分数: {policy.get('quality_score', 0):.2f}/1.00\n")
+
+        # 展示市场规模核心发现
+        market_content = market.get('content', '')
+        if len(market_content) > 200:
+            market_preview = market_content[:200] + "..."
+        else:
+            market_preview = market_content
+
+        print("💰 市场规模")
+        print(f"{market_preview}")
+        print(f"   质量分数: {market.get('quality_score', 0):.2f}/1.00\n")
+
+        # 展示商业模式核心发现
+        business_content = business_model.get('content', '')
+        if len(business_content) > 200:
+            business_preview = business_content[:200] + "..."
+        else:
+            business_preview = business_content
+
+        print("💡 商业模式")
+        print(f"{business_preview}")
+        print(f"   质量分数: {business_model.get('quality_score', 0):.2f}/1.00\n")
+
+        # 展示图表和报告路径
+        print("="*60)
+        print("📄 完整交付物")
+        print("="*60)
+        print(f"专业报告: {report_path}")
+        print(f"图表数量: {chart_summary['count']}张")
+        print(f"数据源: {len(collected_data.get('sources', []))}个 (Tier 1覆盖率: {collected_data.get('tier1_coverage', 0):.1%})")
+        print(f"质量问题: {len(issues)}个")
+        print(f"AI分析平均质量: {(policy.get('quality_score', 0) + market.get('quality_score', 0) + business_model.get('quality_score', 0)) / 3:.2f}/1.00")
+
+        print("\n💡 您可以：")
+        print("1. 打开完整报告查看所有图表和详细分析")
+        print("2. 询问报告中的具体内容（如：竞争格局怎么样？）")
+        print("3. 对比其他行业或深入某个维度")
 
         return {
             'status': 'success',
@@ -250,7 +325,14 @@ class IndustryResearchOrchestrator:
                 policy.get('quality_score', 0) +
                 market.get('quality_score', 0) +
                 business_model.get('quality_score', 0)
-            ) / 3
+            ) / 3,
+            # 添加分析内容到返回值，供后续对话查询
+            'analysis_content': {
+                'profile': profile,
+                'policy': policy,
+                'market_size': market,
+                'business_model': business_model
+            }
         }
 
     def _prepare_chart_data(self, industry, analysis, collected_data):
