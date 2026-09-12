@@ -8,15 +8,22 @@
 
 ---
 
-## 🎯 这个工具是什么？
+## 🎯 这个Skill是什么？
 
 **Industry Research Skill** 能够在10-40分钟内，生成一份咨询公司水准的行业研究报告。
 
+**怎么用？**
+在Claude对话中说：
+```
+帮我研究【你的行业】
+```
+就这么简单！
+
 **适合谁用？**
-- 📊 **投资人**：快速了解目标行业，辅助投资决策
-- 🚀 **创业者**：市场进入评估，商业模式验证
-- 💼 **战略规划**：企业进入新市场前的全面调研
-- 🎓 **咨询顾问**：快速生成行业分析框架底稿
+- 📊 **投资人** - 快速了解目标行业，辅助投资决策
+- 🚀 **创业者** - 市场进入评估，商业模式验证
+- 💼 **战略规划** - 企业进入新市场前的全面调研
+- 🎓 **咨询顾问** - 快速生成行业分析框架底稿
 
 ---
 
@@ -43,43 +50,70 @@
 
 ## 🚀 快速开始
 
-### 安装
+### 最简单的方式：对话调用（推荐）✨
 
-```bash
-# 1. 克隆项目
-git clone https://github.com/longhuang1997-cpu/industry-research-skill.git
-cd industry-research-skill
-
-# 2. 安装依赖
-pip install -r requirements.txt
-
-# 3. 配置API密钥
-export ANTHROPIC_API_KEY="your-api-key"
+**在Claude对话中直接说**：
+```
+帮我研究医疗陪护行业
 ```
 
-### 使用
+或者更具体：
+```
+帮我研究医疗陪护，重点看政策和竞争，快速版
+```
+
+**就这么简单！** Claude会自动调用Skill生成报告。
+
+---
+
+### 安装Skill（首次使用）
+
+#### 步骤1：克隆项目
+```bash
+git clone https://github.com/longhuang1997-cpu/industry-research-skill.git
+cd industry-research-skill
+```
+
+#### 步骤2：安装依赖
+```bash
+pip install -r requirements.txt
+```
+
+#### 步骤3：配置API密钥
+```bash
+# 方式1：环境变量
+export ANTHROPIC_API_KEY="your-api-key"
+
+# 方式2：编辑config.yaml
+api_key: "your-api-key"
+```
+
+#### 步骤4：安装到Claude
+将`skill.md`文件放到Claude的skills目录（具体路径参考Claude文档）
+
+**安装后**，在任何Claude对话中说"帮我研究XX行业"即可使用。
+
+---
+
+### 命令行调用（可选，适合技术用户）
+
+如果你熟悉Python，也可以直接命令行：
 
 ```bash
-# 最简单 - 快速研究
+# 最简单
 python irs.py "医疗陪护"
 
 # 自然语言指定重点
-python irs.py "医疗陪护" --intent "重点看政策和竞争，快速版"
+python irs.py "医疗陪护" --intent "重点看政策和竞争"
 
-# 精确指定分析维度
+# 精确指定维度
 python irs.py "医疗陪护" --dimensions 政策环境,市场规模,商业模式
 
 # 全量深度模式
 python irs.py "医疗陪护" --mode full
 ```
 
-### 输出
-
-生成专业HTML报告，包含：
-- 📋 执行摘要（行业画像）
-- 📊 分析内容（各个维度的深度分析）
-- 🎯 战略建议（可执行的行动方案）
-- ✅ 质量评分（每个维度的可信度）
+**但对于普通用户，强烈推荐对话方式！**
 
 ---
 
@@ -102,23 +136,85 @@ python irs.py "医疗陪护" --mode full
 
 ## 💡 使用场景
 
-### 场景1：投资尽调
-```bash
-python irs.py "AI芯片" --intent "投资视角，重点看市场规模和竞争格局"
-```
-**输出**：市场容量、增长率、竞争格局、关键玩家、投资机会
+### 在Claude对话中直接使用
 
-### 场景2：市场进入评估
-```bash
-python irs.py "智能陪护机器人" --dimensions 政策环境,进入壁垒,风险分析
+#### 场景1：投资尽调
 ```
-**输出**：政策支持度、进入门槛、主要风险、建议策略
+你：帮我研究AI芯片行业，投资视角，重点看市场规模和竞争格局
 
-### 场景3：商业模式验证
-```bash
-python irs.py "上门护理" --dimensions 商业模式,市场规模,竞争格局
+Claude：[调用Industry Research Skill]
+正在分析...
+已生成报告：AI芯片行业研究报告.html
+- 市场容量：2024年约500亿美元，CAGR 25%
+- 主要玩家：英伟达（60%）、AMD（15%）、Intel（10%）
+- 投资机会：边缘AI芯片、高性能推理芯片
 ```
-**输出**：盈利模型、单位经济、市场空间、竞争强度
+
+#### 场景2：市场进入评估
+```
+你：我想做智能陪护机器人，帮我评估市场进入的可行性
+
+Claude：[调用Industry Research Skill]
+正在分析政策环境、进入壁垒、风险...
+已生成评估报告
+- 政策支持度：★★★★☆（国家养老政策支持）
+- 进入门槛：中等（需要医疗器械认证）
+- 主要风险：技术成熟度、用户接受度
+- 建议策略：先做ToB医院市场，再拓展ToC家庭
+```
+
+#### 场景3：商业模式验证
+```
+你：上门护理服务的商业模式能跑通吗？帮我算算账
+
+Claude：[调用Industry Research Skill]
+正在分析商业模式、市场规模、竞争格局...
+已生成分析报告
+- 单位经济：客单价300元，毛利率40%
+- 市场空间：2024年预计200亿，增长率30%
+- 盈利模型：需要单城市3000+订单/月才能盈亏平衡
+- 竞争格局：区域竞争为主，CR5<20%
+```
+
+---
+
+## 🚀 快速开始
+
+### 对于普通用户（推荐）
+
+**直接在Claude对话中说**：
+```
+帮我研究【你的行业】
+```
+
+就这么简单！Claude会自动调用这个Skill。
+
+### 对于开发者（安装Skill）
+
+如果你是第一次使用，需要安装：
+
+```bash
+# 1. 克隆Skill
+git clone https://github.com/longhuang1997-cpu/industry-research-skill.git
+
+# 2. 安装到Claude
+# (具体步骤参考skill.md)
+
+# 3. 配置API
+export ANTHROPIC_API_KEY="your-key"
+```
+
+安装后，在任何对话中说"帮我研究XX行业"即可使用。
+
+### 对于技术用户（命令行调用）
+
+如果你熟悉Python，也可以直接命令行调用：
+
+```bash
+python irs.py "AI芯片" --intent "投资视角"
+```
+
+但**不推荐普通用户使用命令行**，对话方式更简单。
 
 ---
 
