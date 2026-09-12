@@ -2,10 +2,8 @@
 Industry Research Skill - 项目入口
 
 这是一个轻量级入口文件，直接转发到 core.orchestrator
-实际功能实现在：core/orchestrator.py
 """
 
 if __name__ == '__main__':
     from core.orchestrator import main
     main()
-
