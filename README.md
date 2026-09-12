@@ -1,338 +1,298 @@
-# Industry Research Skill
+# Industry Research Skill - AI驱动的行业研究工具
 
-AI辅助行业研究自动化工具 - 从数据收集到报告生成的完整解决方案
-
-## 项目概述
-
-Industry Research Skill是一个基于Python的自动化行业研究系统，能够在70分钟内生成专业的行业研究报告（快速模式）或3-5小时内生成深度研究报告（全量模式）。
-
-### 核心特性
-
-- **智能框架选择**：基于4象限分类法自动选择最合适的分析框架
-- **自动数据收集**：集成Web搜索，自动收集Tier 1高质量数据源
-- **7种专业图表**：金字塔图、瀑布图、对比饼图、时间线图、散点图、趋势图、雷达图
-- **3种行业配色**：医疗、金融、科技行业专用配色方案
-- **5维质量检查**：数据来源、财务模型、图表质量、逻辑一致性、HTML格式
-- **双模式运行**：快速模式（70分钟）和全量模式（3-5小时）
-
-## 快速开始
-
-### 安装依赖
-
-```bash
-pip install -r requirements.txt
-```
-
-### 快速模式（70分钟）
-
-```bash
-python orchestrator/orchestrator.py "医疗陪护" --mode quick
-```
-
-输出：
-- 4-6张核心图表（SVG格式）
-- 1页执行摘要（HTML）
-- Tier 1数据覆盖率报告
-
-### 全量模式（3-5小时）
-
-```bash
-python orchestrator/orchestrator.py "医疗陪护" --mode full
-```
-
-输出：
-- 6+张完整图表
-- 6章节完整报告
-- 3个人工决策点
-- 详细数据来源清单
-
-## 项目结构
-
-```
-industry-research-skill/
-├── orchestrator/              # 主控层
-│   └── orchestrator.py       # 流程编排（快速/全量模式）
-├── knowledge/                 # 知识层
-│   ├── frameworks/           # 分析框架
-│   │   ├── framework_selector.py        # 框架选择器
-│   │   └── framework_decision_tree.yaml # 框架决策树
-│   └── data_sources/         # 数据源
-│       ├── data_source_selector.py      # 数据源选择器
-│       └── data_source_tree.yaml        # 数据源树
-├── execution/                 # 执行层
-│   ├── charts/               # 图表生成器（7种）
-│   │   ├── pyramid.py        # 金字塔图
-│   │   ├── waterfall.py      # 瀑布图
-│   │   ├── comparison_pie.py # 对比饼图
-│   │   ├── timeline.py       # 时间线图
-│   │   ├── scatter_matrix.py # 散点矩阵图
-│   │   ├── line_chart.py     # 趋势图
-│   │   └── radar_chart.py    # 雷达图
-│   ├── styles/               # 配色方案
-│   │   └── colors.py         # 3种行业配色
-│   ├── data_collector.py     # 数据收集器
-│   ├── framework_applier.py  # 框架应用器
-│   └── chart_generator.py    # 图表生成统一接口
-├── output/                    # 输出层
-│   ├── quality_checker.py    # 5维质量检查
-│   ├── report_generator.py   # HTML报告生成
-│   └── packaging.py          # 交付物打包
-├── utils/                     # 工具模块
-│   ├── web_search_utils.py   # Web搜索工具
-│   ├── file_utils.py         # 文件工具
-│   ├── yaml_loader.py        # YAML加载器
-│   └── logger.py             # 日志工具
-├── config.yaml               # 配置文件
-├── requirements.txt          # 依赖清单
-└── README.md                 # 项目文档
-```
-
-## 核心功能
-
-### 1. 智能框架选择
-
-基于4象限分类自动选择分析框架：
-
-- **象限1**（政府主导+高监管）：医疗陪护、养老服务
-- **象限2**（政府主导+低监管）：公共交通、市政服务
-- **象限3**（市场主导+高监管）：金融科技、网约车
-- **象限4**（市场主导+低监管）：电商、社交媒体
-
-每个象限匹配不同的分析框架组合。
-
-### 2. 自动数据收集
-
-**Tier分级系统：**
-- **Tier 1**：政府官网、统计局（覆盖率目标≥60%）
-- **Tier 2**：行业协会、券商研报
-- **Tier 3**：媒体报道、企业年报
-
-**功能：**
-- 批量搜索（支持8+个关键词）
-- 自动去重
-- 来源可追溯性
-
-### 3. 7种专业图表
-
-| 图表类型 | 用途 | 适用场景 |
-|---------|------|---------|
-| 金字塔图 | 行业结构分层 | 市场规模分层、用户分级 |
-| 瀑布图 | 单位经济模型 | 成本拆解、利润分析 |
-| 对比饼图 | 支付结构演进 | 现状vs目标对比 |
-| 时间线图 | 政策演进 | 历史事件、里程碑 |
-| 散点矩阵图 | 竞争格局 | 企业定位、市场格局 |
-| 趋势图 | 市场规模趋势 | 时间序列数据 |
-| 雷达图 | PEST分析 | 多维度对比 |
-
-### 4. 5种分析框架
-
-| 框架 | 权重 | 适用场景 |
-|------|------|---------|
-| PEST分析 | 30% | 政策驱动型行业 |
-| 行业链分析 | 25% | 供应链结构 |
-| 四方决策链 | 25% | 多方决策场景 |
-| 单位经济模型 | 15% | 盈利能力分析 |
-| 波特五力 | 5% | 竞争格局分析 |
-
-### 5. 双模式运行
-
-#### 快速模式（70分钟）
-
-6个关键步骤：
-1. 数据收集（10分钟）
-2. 框架分析（15分钟）
-3. 快速可视化（20分钟）
-4. 执行摘要（10分钟）
-5. 质量检查（10分钟）
-6. 打包交付（5分钟）
-
-#### 全量模式（3-5小时）
-
-5个深度阶段 + 3个人工决策点：
-1. **Phase 1**: 深度数据收集 → **决策点1**：数据来源确认
-2. **Phase 2**: 深度框架分析
-3. **Phase 3**: 完整图表生成（6+张）
-4. **Phase 4**: 完整报告生成 → **决策点2**：洞察深度自检
-5. **Phase 5**: 质量检查和打包 → **决策点3**：最终质量把关
-
-## 使用示例
-
-### 示例1：研究医疗陪护行业
-
-```python
-from orchestrator.orchestrator import IndustryResearchOrchestrator
-
-# 初始化
-orchestrator = IndustryResearchOrchestrator(mode='quick')
-
-# 运行研究
-result = orchestrator.run(
-    industry_name='医疗陪护',
-    user_params={
-        'industry': '医疗陪护',
-        'web_search': True,
-        'mode': 'quick'
-    }
-)
-
-print(f"Status: {result['status']}")
-print(f"Charts: {result['charts']}")
-print(f"Tier 1 Coverage: {result['tier1_coverage']:.1%}")
-```
-
-### 示例2：生成单个图表
-
-```python
-from execution.charts.pyramid import PyramidChart
-
-# 准备数据
-data = {
-    'title': '医疗陪护行业结构金字塔',
-    'layers': [
-        {'label': '高端市场', 'value': 630, 'unit': '亿元'},
-        {'label': '中端市场', 'value': 470, 'unit': '亿元'},
-        {'label': '基础市场', 'value': 210, 'unit': '亿元'}
-    ]
-}
-
-# 生成图表
-chart = PyramidChart('医疗陪护行业结构', industry='medical')
-chart.save(data, 'output/pyramid.svg')
-```
-
-## 配置说明
-
-`config.yaml` 主要配置项：
-
-```yaml
-skill:
-  name: industry-research
-  version: 0.1.0-alpha
-  mode: quick  # quick | full
-
-paths:
-  skill_root: "."
-  output_dir: "./output"
-  charts_dir: "./output/charts"
-
-quality:
-  tier1_coverage_threshold: 0.6
-  min_charts: 3
-  max_execution_time: 7200  # seconds
-```
-
-## 依赖清单
-
-- `matplotlib>=3.5.0` - 图表生成
-- `pyyaml>=6.0` - YAML配置解析
-- `requests>=2.28.0` - HTTP请求
-- `pillow>=9.0.0` - 图像处理
-- `numpy>=1.21.0` - 数值计算
-- `pandas>=1.3.0` - 数据处理
-- `jinja2>=3.0.0` - HTML模板
-
-## 开发路线图
-
-### 已完成（v0.1.0-alpha）
-
-- [x] 7种核心图表生成器
-- [x] 3种行业配色方案
-- [x] 5种分析框架应用
-- [x] 自动数据收集（Web搜索集成）
-- [x] 5维质量检查
-- [x] HTML报告生成
-- [x] 快速模式和全量模式
-- [x] 3个人工决策点
-
-### 计划中（v0.2.0-beta）
-
-- [ ] 真实的人工决策点UI（弹出对话框）
-- [ ] PDF报告生成（替代HTML）
-- [ ] 更多行业预设（10+行业）
-- [ ] 自定义框架权重
-- [ ] 数据缓存机制
-- [ ] 性能优化（并行处理）
-
-### 未来规划（v1.0.0）
-
-- [ ] Claude Code Skill集成
-- [ ] 多语言支持（英文、日文）
-- [ ] 云端部署版本
-- [ ] API接口
-- [ ] Web UI
-
-## 测试
-
-### 运行单元测试
-
-```bash
-# 测试图表生成器
-python execution/charts/pyramid.py
-python execution/charts/waterfall.py
-python execution/charts/line_chart.py
-python execution/charts/radar_chart.py
-
-# 测试框架应用器
-python execution/framework_applier.py
-
-# 测试质量检查器
-python output/quality_checker.py
-
-# 测试报告生成器
-python output/report_generator.py
-```
-
-### 端到端测试
-
-```bash
-# 快速模式
-python orchestrator/orchestrator.py "医疗陪护" --mode quick
-
-# 全量模式
-python orchestrator/orchestrator.py "医疗陪护" --mode full
-```
-
-## 性能指标
-
-| 指标 | 快速模式 | 全量模式 |
-|------|---------|---------|
-| 执行时间 | 70分钟 | 3-5小时 |
-| 图表数量 | 4-6张 | 6+张 |
-| 报告章节 | 1页摘要 | 6个章节 |
-| Tier 1覆盖率 | ≥60% | ≥80% |
-| 质量检查 | 自动 | 自动+人工 |
-
-## 常见问题
-
-**Q: Windows上中文显示乱码怎么办？**  
-A: 系统已处理了所有emoji字符，使用纯ASCII输出。如果仍有乱码，请确保终端编码设置为UTF-8。
-
-**Q: 图表生成失败怎么办？**  
-A: 系统采用容错设计，单个图表失败不会影响整体流程。查看控制台的`[SKIP]`消息了解失败原因。
-
-**Q: 如何添加新的行业？**  
-A: 编辑`knowledge/frameworks/framework_decision_tree.yaml`，在对应象限下添加行业名称和特征关键词。
-
-**Q: 如何自定义图表配色？**  
-A: 在`execution/styles/colors.py`中创建新的配色方案类，继承`ColorScheme`基类。
-
-**Q: 支持哪些数据源？**  
-A: 当前支持Web搜索（集成Tier分级），未来将支持API接口、数据库导入等。
-
-## 许可证
-
-本项目采用 MIT 许可证。
-
-## 贡献
-
-欢迎提交Issue和Pull Request！
-
-## 联系方式
-
-- 项目地址：`C:\Users\huangl265\projects\industry-research-skill`
-- 文档版本：v0.1.0-alpha
-- 最后更新：2026-09-11
+**版本**: v0.2.0-beta  
+**更新日期**: 2026-09-12
 
 ---
 
-**Industry Research Skill - 让行业研究自动化，专注于洞察而非执行**
+## 🎯 产品定位
+
+**Industry Research Skill** 是一个AI驱动的咨询级行业研究工具，帮助企业快速完成战略规划和市场进入评估。
+
+### 核心价值
+- ✅ **咨询公司水准** - 对标BCG/麦肯锡的分析框架
+- ✅ **从钩子到深度** - 小白10分钟体验，专家60分钟深度研究
+- ✅ **教育式设计** - 在使用过程中学习行业研究方法论
+- ✅ **可执行建议** - 战略建议必须包含数字、时间、责任人
+
+---
+
+## 🚀 快速开始
+
+### 环境准备
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/longhuang1997-cpu/industry-research-skill.git
+cd industry-research-skill
+
+# 2. 安装依赖
+pip install -r requirements.txt
+
+# 3. 设置API密钥（支持中转站）
+export ANTHROPIC_API_KEY="your-api-key"
+export ANTHROPIC_BASE_URL="https://your-relay-service.com"  # 可选
+```
+
+### 模式1：快速钩子（小白模式 - 10分钟）
+
+**适合**：第一次使用、快速决策、初步调研
+
+```bash
+python irs.py "医疗陪护"
+```
+
+**输出**：
+- 行业画像（3个关键特征）
+- 政策环境分析（200字深度洞察）
+- 市场规模测算（含具体数字）
+- 战略建议（可执行）
+
+### 模式2：交互深度（专家模式 - 30-60分钟）
+
+**适合**：深度研究、战略规划、市场进入评估
+
+```bash
+python irs.py "医疗陪护" --interactive
+```
+
+**流程**：
+1. **阶段1**：行业扫描与定位
+2. **阶段2**：选择研究维度（政策/市场/商业模式/竞争/壁垒）
+3. **阶段3**：AI深度分析（多轮推理）
+4. **阶段4**：生成咨询级报告
+
+---
+
+## 📊 输出示例
+
+### 快速模式输出（医疗陪护行业）
+
+```
+📋 【医疗陪护】行业快速洞察
+
+【行业画像】
+政府主导+高监管行业，长护险试点49城覆盖1.45亿人。核心机会在于
+4500万失能老人的刚需市场，但面临65%人力成本占比的盈利压力。
+市场高度分散，CR5<10%，无绝对龙头。
+
+【政策环境】（质量分数: 0.85）
+长护险试点是医疗陪护行业的核心政策红利。截至2023年，49个试点
+城市覆盖1.45亿参保人，年赔付额约300亿元。但试点呈现'碎片化'
+特征：上海按月支付600元，青岛达1200元，待遇差异显著...
+
+【市场规模】（质量分数: 0.90）
+医疗陪护市场规模测算（2023年）：Top-down：中国60岁以上老年人
+2.8亿，失能/半失能约4500万人。其中需要长期陪护约2000万人，
+渗透率10%（参考日本15%），客单价300元/天×30天=9000元/月...
+
+【战略建议】
+目标市场：优先进入长三角+珠三角长护险试点城市（苏州、杭州、
+广州），理由：1）政策落地快，报销额度高；2）支付能力强；
+3）护理人才供给充足。资源配置：首轮投入300-500万元...
+```
+
+---
+
+## 🏗️ 核心架构
+
+### 咨询级AI分析引擎
+
+```python
+from execution.consulting_ai_analyzer import ConsultingAIAnalyzer
+
+analyzer = ConsultingAIAnalyzer()
+
+# 深度行业分析
+results = analyzer.deep_industry_analysis(
+    industry='医疗陪护',
+    focus_areas=['政策环境', '市场规模', '商业模式'],
+    context={}
+)
+```
+
+### 分析框架
+
+**1. 政策环境分析（PEST-P深度拆解）**
+- 识别核心政策驱动因素
+- 量化政策影响（市场规模、成本结构）
+- 预测政策趋势（未来2-3年）
+
+**2. 市场规模测算（双验证法）**
+- Top-down测算（用户群体×渗透率×客单价）
+- Bottom-up验证（典型企业营收×市场份额）
+- 增长驱动因素（CAGR预测）
+
+**3. 商业模式拆解**
+- 四方决策链分析
+- 单位经济模型（LTV/CAC比值、盈亏平衡点）
+- 典型模式对比
+
+**4. 竞争格局分析**
+- 市场集中度（CR5）
+- 典型玩家分析
+- 竞争壁垒识别
+
+**5. 战略建议生成**
+- 目标市场选择（具体城市）
+- 差异化定位
+- 资源配置建议（金额、团队、时间）
+- 风险规避措施
+
+---
+
+## 💡 核心特性
+
+### 1. 咨询公司水准的AI提示词
+
+每个分析框架都设计了**专业的提示词工程**：
+
+- ✅ 要求AI像BCG/麦肯锡分析师一样思考
+- ✅ 必须包含具体数字和数据支撑
+- ✅ 给出可执行的战略建议
+- ✅ 300-400字深度分析（非泛泛而谈）
+
+### 2. 质量评分系统
+
+自动评估AI生成内容的质量：
+
+- 是否包含数字（+0.3分）
+- 长度是否充足（+0.3分）
+- 是否包含建议（+0.2分）
+- 是否有清晰结构（+0.2分）
+
+质量分数>0.7才算合格
+
+### 3. 教育式设计
+
+在使用过程中学习行业研究方法论：
+
+```
+💡 研究方法：先宏观后微观，先政策后市场
+
+💡 您刚刚完成了一次完整的咨询级行业研究！
+学到的研究方法：
+  ✓ 政策驱动型行业从政策入手
+  ✓ 四方决策链分析法
+  ✓ 单位经济模型验证商业可行性
+```
+
+### 4. 中转站API支持
+
+完美支持国内中转站API：
+
+```bash
+export ANTHROPIC_API_KEY="your-relay-key"
+export ANTHROPIC_BASE_URL="https://bobdong.cn"
+```
+
+---
+
+## 📁 项目结构
+
+```
+industry-research-skill/
+├── irs.py                            # 统一入口（快速/交互模式）
+├── interactive_researcher.py         # 交互式研究工具
+│
+├── execution/
+│   ├── consulting_ai_analyzer.py    # 咨询级AI分析引擎 ⭐新增
+│   ├── ai_analyzer.py               # 基础AI分析引擎
+│   ├── framework_applier.py         # 框架应用器
+│   ├── data_collector.py            # 数据收集器
+│   └── chart_generator.py           # 图表生成器
+│
+├── knowledge/                        # 知识层
+├── output/                          # 输出层
+├── orchestrator/                    # 主控层
+└── requirements.txt
+```
+
+---
+
+## 🎓 使用场景
+
+### 1. 战略规划
+- 企业进入新市场前的全面评估
+- 制定3-5年战略规划
+- 识别核心机会和风险
+
+### 2. 市场进入评估
+- 评估目标市场的吸引力
+- 识别关键成功要素
+- 制定进入策略和时间表
+
+### 3. 投资尽调
+- 快速了解目标行业
+- 评估商业模式可行性
+- 识别关键风险点
+
+### 4. 竞争分析
+- 分析竞争格局
+- 识别差异化机会
+- 制定竞争策略
+
+---
+
+## 📈 版本历史
+
+### v0.2.0-beta (2026-09-12)
+
+**重大更新**：重新设计为咨询级工具
+
+- ✅ 新增`ConsultingAIAnalyzer`咨询级AI分析引擎
+- ✅ 新增`irs.py`统一入口（支持快速/交互模式）
+- ✅ 新增`interactive_researcher.py`交互式研究工具
+- ✅ 优化AI提示词，生成真正的深度洞察
+- ✅ 新增质量评分系统
+- ✅ 新增教育式设计元素
+
+### v0.1.0-alpha (2026-09-11)
+
+**初始版本**：基础功能实现
+
+- ✅ 7种专业图表生成
+- ✅ 5种分析框架
+- ✅ 基础AI分析引擎
+- ✅ 中转站API支持
+
+---
+
+## 🔧 技术栈
+
+- **Python 3.11+**
+- **Claude API** (Sonnet 5) - 深度推理
+- **anthropic** - API客户端
+- **matplotlib** - 图表生成
+- **pyyaml** - 配置管理
+
+---
+
+## 📞 联系方式
+
+**GitHub**: https://github.com/longhuang1997-cpu/industry-research-skill  
+**License**: MIT
+
+---
+
+## 🎊 下一步开发计划
+
+### v0.3.0 - 真实数据集成
+- [ ] 集成真实的Web搜索（不再是模拟数据）
+- [ ] 接入行业数据库API
+- [ ] 自动引用数据来源
+
+### v0.4.0 - 报告增强
+- [ ] 生成PDF格式报告
+- [ ] 增加更多图表类型
+- [ ] 支持自定义报告模板
+
+### v1.0.0 - 生产就绪
+- [ ] 完整的单元测试
+- [ ] 性能优化
+- [ ] Docker容器化部署
+- [ ] Web界面
+
+---
+
+**Industry Research Skill - 让行业研究变得简单、专业、高效！** 🚀
