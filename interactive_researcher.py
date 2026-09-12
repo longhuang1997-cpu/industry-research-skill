@@ -142,15 +142,106 @@ class InteractiveResearcher:
         print("\n━" * 60)
         print("\n✅ 研究完成！\n")
 
-        # 保存报告
-        output_file = f"output/{self.industry}_deep_research.html"
-        print(f"📄 报告已保存: {output_file}")
+        # 生成HTML报告
+        self._save_html_report(recommendations)
 
         print("\n💡 您刚刚完成了一次完整的咨询级行业研究！")
         print("学到的研究方法：")
         print("  ✓ 政策驱动型行业从政策入手")
         print("  ✓ 四方决策链分析法")
         print("  ✓ 单位经济模型验证商业可行性")
+
+    def _save_html_report(self, recommendations):
+        """保存HTML报告"""
+        from datetime import datetime
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_file = f"output/{self.industry}_deep_research_{timestamp}.html"
+
+        # 获取分析结果
+        analysis = self.research_data.get('analysis', {})
+        profile = self.research_data.get('profile', {})
+
+        # 生成HTML内容
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{self.industry} - 深度行业研究报告</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+        .container {{ max-width: 1000px; margin: 0 auto; background: white; padding: 40px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+        h1 {{ color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }}
+        h2 {{ color: #34495e; margin-top: 30px; border-left: 4px solid #3498db; padding-left: 10px; }}
+        .section {{ margin: 20px 0; padding: 15px; background: #ecf0f1; border-radius: 5px; }}
+        .quality {{ color: #27ae60; font-weight: bold; }}
+        .profile {{ background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0; }}
+        .footer {{ margin-top: 40px; text-align: center; color: #7f8c8d; font-size: 12px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{self.industry} 行业深度研究报告</h1>
+        <p style="color: #7f8c8d;">生成时间: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+
+        <div class="profile">
+            <h2>行业画像</h2>
+            <p>{profile.get('summary', '暂无数据')}</p>
+        </div>
+"""
+
+        # 添加各个分析维度
+        if 'policy' in analysis:
+            html_content += f"""
+        <div class="section">
+            <h2>政策环境分析</h2>
+            <p class="quality">质量分数: {analysis['policy'].get('quality_score', 0):.2f}</p>
+            <p>{analysis['policy'].get('content', '暂无数据')}</p>
+        </div>
+"""
+
+        if 'market_size' in analysis:
+            html_content += f"""
+        <div class="section">
+            <h2>市场规模测算</h2>
+            <p class="quality">质量分数: {analysis['market_size'].get('quality_score', 0):.2f}</p>
+            <p>{analysis['market_size'].get('content', '暂无数据')}</p>
+        </div>
+"""
+
+        if 'business_model' in analysis:
+            html_content += f"""
+        <div class="section">
+            <h2>商业模式分析</h2>
+            <p class="quality">质量分数: {analysis['business_model'].get('quality_score', 0):.2f}</p>
+            <p>{analysis['business_model'].get('content', '暂无数据')}</p>
+        </div>
+"""
+
+        # 添加战略建议
+        html_content += f"""
+        <div class="section" style="background: #d4edda; border-left: 4px solid #28a745;">
+            <h2>战略建议</h2>
+            <p>{recommendations.get('content', '暂无数据')}</p>
+        </div>
+
+        <div class="footer">
+            <p>本报告由 Industry Research Skill v0.3.0 生成</p>
+            <p>AI驱动的咨询级行业研究工具</p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        # 确保output目录存在
+        Path("output").mkdir(exist_ok=True)
+
+        # 写入文件
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+        print(f"📄 报告已保存: {output_file}")
 
 
 def main():
