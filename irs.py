@@ -1,6 +1,10 @@
 """
 Industry Research Skill - 统一入口
-调用orchestrator.py作为主控层
+
+架构重构（2026-09-12）：
+- 精简模块，用Prompt工程替代复杂脚本
+- core/research_engine.py: 统一研究引擎
+- core/orchestrator.py: 精简主控层
 """
 
 import sys
@@ -20,31 +24,28 @@ def run_research(industry, user_params=None):
         industry: 行业名称
         user_params: 用户参数字典（可选）
             - dimensions: List[str] - 分析维度列表
+            - intent: str - 自然语言意图
             - depth: str - 研究深度
-            - web_search: bool - 是否联网搜索
-            - perspective: str - 分析视角
+            - mode: str - 研究模式（quick/full）
 
     Returns:
         result: 研究结果字典
     """
-    from orchestrator.orchestrator import IndustryResearchOrchestrator
+    from core.orchestrator import Orchestrator
 
     # 默认参数
     if user_params is None:
         user_params = {}
 
     # 设置默认值
-    user_params.setdefault('industry', industry)
-    user_params.setdefault('web_search', True)
-    user_params.setdefault('mode', 'quick')
+    mode = user_params.get('mode', 'quick')
 
     # 创建orchestrator
-    mode = user_params.get('mode', 'quick')
-    orchestrator = IndustryResearchOrchestrator(mode=mode)
+    orchestrator = Orchestrator(mode=mode)
 
     # 执行研究
     result = orchestrator.run(
-        industry_name=industry,
+        industry=industry,
         user_params=user_params
     )
 
@@ -60,23 +61,21 @@ def main():
         print()
         print("使用方法:")
         print()
-        print("1. 标准研究（30分钟）:")
+        print("1. 快速研究:")
         print("   python irs.py <行业名称>")
         print("   示例: python irs.py 医疗陪护")
         print()
-        print("2. 自定义维度:")
-        print("   python irs.py <行业名称> --dimensions 政策环境,市场规模")
-        print("   示例: python irs.py 医疗陪护 --dimensions 政策环境,竞争格局")
+        print("2. 自然语言:")
+        print("   python irs.py <行业名称> --intent \"重点看政策和竞争，快速版\"")
         print()
-        print("3. 自定义深度:")
-        print("   python irs.py <行业名称> --depth 10分钟")
-        print("   示例: python irs.py 医疗陪护 --depth 快速")
+        print("3. 指定维度:")
+        print("   python irs.py <行业名称> --dimensions 政策环境,市场规模,商业模式")
         print()
-        print("4. 组合使用:")
-        print("   python irs.py 医疗陪护 --dimensions 政策环境 --depth 10分钟")
+        print("4. 全量模式:")
+        print("   python irs.py <行业名称> --mode full")
         print()
-        print("可用维度: 政策环境, 市场规模, 商业模式, 竞争格局, 进入壁垒, 产业链, 风险分析, 机会识别")
-        print("可用深度: 快速(10分钟), 标准(30分钟), 深度(60分钟)")
+        print("可用维度:")
+        print("  政策环境, 市场规模, 商业模式, 竞争格局, 进入壁垒, 风险分析")
         print()
         sys.exit(1)
 
@@ -85,7 +84,7 @@ def main():
     # 解析命令行参数
     mode = 'quick'
     dimensions = None
-    depth = None
+    intent = None
 
     # 解析 --mode
     if '--mode' in sys.argv:
@@ -93,66 +92,43 @@ def main():
         if idx + 1 < len(sys.argv):
             mode = sys.argv[idx + 1]
 
-    # 解析 --dimensions (例如: --dimensions 政策环境,市场规模)
+    # 解析 --dimensions
     if '--dimensions' in sys.argv:
         idx = sys.argv.index('--dimensions')
         if idx + 1 < len(sys.argv):
             dimensions = sys.argv[idx + 1].split(',')
 
-    # 解析 --depth (例如: --depth 10分钟)
-    if '--depth' in sys.argv:
-        idx = sys.argv.index('--depth')
+    # 解析 --intent
+    if '--intent' in sys.argv:
+        idx = sys.argv.index('--intent')
         if idx + 1 < len(sys.argv):
-            depth = sys.argv[idx + 1]
-
-    # 兼容旧的 --interactive
-    if '--interactive' in sys.argv:
-        mode = 'full'
+            intent = sys.argv[idx + 1]
 
     # 构建用户参数
-    user_params = {
-        'industry': industry,
-        'web_search': True,
-        'mode': mode
-    }
+    user_params = {'mode': mode}
 
     if dimensions:
         user_params['dimensions'] = dimensions
-
-    if depth:
-        user_params['depth'] = depth
+    if intent:
+        user_params['intent'] = intent
 
     # 调用研究函数
     result = run_research(industry, user_params)
 
     # 输出结果
     print("\n" + "="*60)
-    print("✅ 研究完成！")
-    print("="*60)
-    print(f"\n状态: {result['status']}")
-    print(f"模式: {'快速模式 (70分钟)' if result['mode'] == 'quick' else '全量模式 (3-5小时)'}")
-    print(f"行业: {result['industry']}")
-
     if result['status'] == 'success':
-        print("\n📊 交付物统计:")
-        if 'path' in result:
-            print(f"  • 专业报告: {result['path']}")
-        if 'charts' in result:
-            print(f"  • 图表数量: {result['charts']}张")
-        if 'data_sources' in result:
-            print(f"  • 数据源: {result['data_sources']}个")
-        if 'tier1_coverage' in result:
-            print(f"  • 数据质量: Tier 1覆盖率 {result['tier1_coverage']:.1%}")
-        if 'ai_quality_avg' in result:
-            print(f"  • AI分析质量: {result['ai_quality_avg']:.2f}/1.00")
-        if 'quality_issues' in result:
-            if result['quality_issues'] == 0:
-                print(f"  • 质量检查: ✓ 通过")
-            else:
-                print(f"  • 质量检查: ⚠️  {result['quality_issues']}个问题（可接受）")
-
-    if 'note' in result:
-        print(f"\n📝 备注: {result['note']}")
+        print("✅ 研究完成！")
+        print("="*60)
+        print(f"\n行业: {result['industry']}")
+        print(f"模式: {result.get('mode', 'quick')}")
+        print(f"报告路径: {result.get('path', '未生成')}")
+        print(f"平均质量分: {result.get('quality', {}).get('avg_quality', 0):.2f}")
+        print(f"预计时间: {result.get('total_time', 0)} 分钟")
+    else:
+        print("❌ 研究失败")
+        print("="*60)
+        print(f"\n错误: {result.get('error', '未知错误')}")
 
 
 if __name__ == '__main__':

@@ -1,8 +1,8 @@
 ---
 name: industry-research
-description: AI驱动的咨询级行业研究 - 快速模式70分钟 | 全量模式3-5小时
-version: 0.4.0
-author: Based on consulting methodology
+description: AI驱动的咨询级行业研究 - Prompt工程驱动，无复杂脚本
+version: 1.0.0
+author: Refactored 2026-09-12
 ---
 
 # 使用方法
@@ -14,92 +14,99 @@ author: Based on consulting methodology
 帮我研究一下【医疗陪护】行业
 ```
 
-或使用skill命令：
+或者自然语言指定重点：
 ```
-/industry-research 医疗陪护
-/industry-research 医疗陪护 --mode full
+帮我研究医疗陪护，重点看政策和竞争，快速版
 ```
 
 ## 命令行调用
 
 ```bash
+# 快速研究
 python irs.py "医疗陪护"
+
+# 自然语言
+python irs.py "医疗陪护" --intent "重点看政策和竞争"
+
+# 指定维度
+python irs.py "医疗陪护" --dimensions 政策环境,市场规模,商业模式
+
+# 全量模式
 python irs.py "医疗陪护" --mode full
 ```
 
-## 参数说明
+## 核心特性
 
-- `行业名称`：必需，如"医疗陪护"、"金融科技"、"在线教育"
-- `--mode`：可选
-  - `quick`（默认）：快速模式，70分钟，完整流程
-  - `full`：全量模式，3-5小时，深度研究+3个人工决策点
+### ✅ Prompt工程驱动
+- 不再依赖复杂脚本逻辑
+- 所有分析框架通过精心设计的Prompt实现
+- 框架知识（PEST、Porter、四方决策链）直接注入Prompt
 
-## 工作流程
+### ✅ 智能意图理解
+- 自然语言 → 结构化参数
+- "重点看政策和竞争，快速版" → {'dimensions': ['政策环境', '竞争格局'], 'depth': '快速'}
 
-### Quick模式（70分钟）
-1. **数据收集** - 联网搜索 + Tier分级
-2. **框架分析 + AI分析** - 5个框架 + 咨询级AI洞察
-3. **图表生成** - 7种专业图表
-4. **专业报告** - 麦肯锡风格HTML
-5. **质量检查** - 5维度质检
-6. **打包交付**
+### ✅ 动态工作流
+- 按需生成研究流程
+- 自动解析依赖关系
+- 最小化时间成本
 
-### Full模式（3-5小时）
-- 所有Quick模式内容
-- 扩展分析维度（竞争格局、进入壁垒）
-- 3个人工决策点
-- 更深度的数据收集
+### ✅ 咨询级分析
+- BCG/麦肯锡分析标准
+- 必须包含具体数字和案例
+- 给出可执行的战略建议
+
+## 支持的分析维度
+
+- 行业画像（必需）
+- 政策环境（PEST-P框架）
+- 市场规模（Top-down + Bottom-up）
+- 商业模式（四方决策链+单位经济）
+- 竞争格局（Porter五力模型）
+- 进入壁垒（五大壁垒类型）
+- 风险分析（PESTEL）
+- 战略建议（必需）
 
 ## 交付物
 
-- 📊 **7种专业图表**：金字塔、瀑布图、饼图、时间线、散点矩阵、折线图、雷达图
-- 📄 **专业HTML报告**：封面 + 执行摘要 + 主体分析 + 附录
-- 📈 **真实数据支撑**：Web搜索 + Tier 1数据源
-- 🧠 **AI咨询洞察**：政策、市场、商业模式、竞争、壁垒
-- ✅ **质量保证**：5维度质检通过
+- 📄 **专业HTML报告**：麦肯锡风格，封面+分析+质量评分
+- 🎯 **质量保证**：自动评分，平均质量分≥0.7
+- ⚡ **高效执行**：按需生成流程，无冗余步骤
+
+## 架构特点
+
+### 精简架构
+```
+irs.py (入口)
+  ↓
+core/orchestrator.py (主控)
+  ↓
+core/research_engine.py (统一引擎)
+  ├─ 意图理解
+  ├─ 动态工作流
+  ├─ AI分析（Prompt工程）
+  └─ 质量检查
+```
+
+### 设计原则
+- **AI推理 > 硬编码规则**
+- **Prompt工程 > 复杂脚本**
+- **按需生成 > 固定模板**
+- **质量优先 > 功能堆砌**
 
 ## 依赖
 
 - Python 3.8+
 - anthropic >= 0.18.0
-- matplotlib >= 3.5.0
 - pyyaml >= 6.0
-- requests >= 2.28.0
 
-## 主控架构
+## 扩展能力
 
-主程序入口：`orchestrator/orchestrator.py`
+### 自建MCP数据源（可选）
+- Skill本身使用Claude的Web搜索能力
+- 如果有付费数据订阅，可自建MCP扩展
+- 参考：`mcp/README.md`
 
-调用链：
-```
-用户请求 → Orchestrator (主控)
-  ↓
-知识层 (FrameworkSelector + DataSourceSelector)
-  ↓
-执行层 (DataCollector + FrameworkApplier + ConsultingAIAnalyzer + ChartGenerator)
-  ↓
-输出层 (QualityChecker + ProfessionalReportGenerator + Packager)
-```
+---
 
-## 配置
-
-配置文件：`skill_config.yaml`
-
-关键配置：
-- `model`: 留空自动检测当前会话模型，或手动指定
-- `api_key`: 留空从settings.json读取
-- `base_url`: 可选，用于中转站
-
-## 示例
-
-**快速研究（对话）**：
-> 帮我研究一下医疗陪护行业
-
-**深度研究（对话）**：
-> 帮我深度研究医疗陪护行业，使用全量模式
-
-**命令行**：
-```bash
-python irs.py "医疗陪护"
-python irs.py "金融科技" --mode full
-```
+**重构理念**：让AI做AI擅长的事（推理），用脚本做脚本擅长的事（编排）。不要用脚本模拟AI的推理过程。
