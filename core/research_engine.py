@@ -234,7 +234,7 @@ class ResearchEngine:
                 'dimension': dimension
             }
         except Exception as e:
-            print(f"⚠️  分析失败: {dimension} - {e}")
+            print(f"[WARN]  分析失败: {dimension} - {e}")
             return {
                 'content': f'{dimension}分析失败，请重试',
                 'quality_score': 0.0,
@@ -561,7 +561,7 @@ class ResearchEngine:
 
             except Exception as e:
                 if attempt < max_retries - 1:
-                    print(f"   ⚠️  API调用失败，正在重试 ({attempt + 1}/{max_retries})...")
+                    print(f"   [WARN]  API调用失败，正在重试 ({attempt + 1}/{max_retries})...")
                     import time
                     time.sleep(2 ** attempt)
                 else:

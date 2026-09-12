@@ -136,7 +136,7 @@ class ConsultingAIAnalyzer:
             }
         except Exception as e:
             # 打印详细错误信息用于调试
-            print(f"\n⚠️ API调用失败: {type(e).__name__}: {str(e)}")
+            print(f"\n[WARN] API调用失败: {type(e).__name__}: {str(e)}")
             # Fallback到高质量模板
             return self._policy_fallback(industry)
 
@@ -189,7 +189,7 @@ Bottom-up验证：头部企业（小鸟慧医）年营收约8亿元，市占率�
                 'quality_score': self._assess_quality(conclusion)
             }
         except Exception as e:
-            print(f"\n⚠️ API调用失败(市场规模): {type(e).__name__}: {str(e)}")
+            print(f"\n[WARN] API调用失败(市场规模): {type(e).__name__}: {str(e)}")
             return self._market_size_fallback(industry)
 
     def _analyze_business_model(self, industry: str, context: Dict) -> Dict:
@@ -248,7 +248,7 @@ Bottom-up验证：头部企业（小鸟慧医）年营收约8亿元，市占率�
                 'quality_score': self._assess_quality(conclusion)
             }
         except Exception as e:
-            print(f"\n⚠️ API调用失败(商业模式): {type(e).__name__}: {str(e)}")
+            print(f"\n[WARN] API调用失败(商业模式): {type(e).__name__}: {str(e)}")
             return self._business_model_fallback(industry)
 
     def _analyze_industry_profile(self, industry: str) -> Dict:
@@ -375,7 +375,7 @@ Bottom-up验证：头部企业（小鸟慧医）年营收约8亿元，市占率�
                 except Exception as api_error:
                     last_error = api_error
                     if attempt < max_retries - 1:
-                        print(f"   ⚠️  API调用失败，正在重试 ({attempt + 1}/{max_retries})...")
+                        print(f"   [WARN]  API调用失败，正在重试 ({attempt + 1}/{max_retries})...")
                         import time
                         time.sleep(2 ** attempt)  # 指数退避：2秒、4秒
                     else:
