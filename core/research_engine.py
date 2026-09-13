@@ -24,6 +24,7 @@ class ResearchEngine:
 
     # ==================== 分析维度定义 ====================
     DIMENSIONS = {
+        # 通用维度（适用于多种研究类型）
         '行业画像': {
             'time': 2,  # 分钟
             'required': True,
@@ -64,6 +65,66 @@ class ResearchEngine:
             'required': True,
             'dependencies': ['行业画像'],
             'prompt_template': 'strategy'
+        },
+
+        # 公司对标专用维度
+        '核心能力': {
+            'time': 10,
+            'dependencies': ['行业画像'],
+            'prompt_template': 'core_competency'
+        },
+        '壁垒迁移': {
+            'time': 10,
+            'dependencies': ['核心能力', '政策环境'],
+            'prompt_template': 'barrier_migration'
+        },
+        '财务测算': {
+            'time': 12,
+            'dependencies': ['核心能力', '市场规模'],
+            'prompt_template': 'financial_modeling'
+        },
+
+        # 投资尽调专用维度
+        '竞争壁垒': {
+            'time': 10,
+            'dependencies': ['竞争格局'],
+            'prompt_template': 'competitive_moat'
+        },
+        '估值测算': {
+            'time': 12,
+            'dependencies': ['商业模式', '市场规模'],
+            'prompt_template': 'valuation'
+        },
+
+        # 战略指导专用维度
+        '路径设计': {
+            'time': 10,
+            'dependencies': ['市场规模', '竞争格局'],
+            'prompt_template': 'strategy_path'
+        },
+        '资源评估': {
+            'time': 8,
+            'dependencies': ['路径设计'],
+            'prompt_template': 'resource_assessment'
+        },
+
+        # 市场进入可行性专用维度
+        '单位经济': {
+            'time': 10,
+            'dependencies': ['市场规模'],
+            'prompt_template': 'unit_economics'
+        },
+
+        # 合作评估专用维度
+        '合作价值': {
+            'time': 10,
+            'dependencies': ['商业模式'],
+            'prompt_template': 'partnership_value'
+        },
+        '风险识别': {
+            'time': 8,
+            'dependencies': ['合作价值'],
+            'prompt_template': 'risk_identification'
         }
     }
 
@@ -191,11 +252,13 @@ class ResearchEngine:
                 step_enhancement = self._generate_hypothesis_evidence_conclusion(
                     research_type, dim
                 )
-                step.update(step_enhancement)
 
-                # 识别是否需要内部数据
-                if step_enhancement.get('needs_internal_data'):
+                # 识别是否需要内部数据（在update之前收集）
+                if step_enhancement.get('needs_internal_data') and step_enhancement.get('internal_data_desc'):
                     data_requirements.append(step_enhancement['internal_data_desc'])
+
+                # 更新step（包含假设-证据-结论字段）
+                step.update(step_enhancement)
 
                 workflow_steps.append(step)
 
