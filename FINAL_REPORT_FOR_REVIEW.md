@@ -258,13 +258,14 @@ print(f'分数: {result.score}, 通过: {result.passed}')
 2. ✅ **警告用户**
    - 在`V2_CORRECTION.md`中明确提醒
    - 建议立即作废泄露的密钥
+   - （审核agent已确认配置文件中的密钥已清除；本文件按溯源文档惯例不再复述密钥值）
 
 ### 需要用户操作
 
 **紧急**:
 ```bash
 # 1. 登录 https://bobdong.cn 后台
-# 2. 作废密钥: sk-SXCkjzLkvG2ElDmyvkz3D4i1W7GatMXrqwLSTRuXYIUf028S
+# 2. 作废泄露的旧密钥（见 Git 历史 02104cb 之前的版本，避免在此复述）
 # 3. 生成新密钥
 # 4. 设置环境变量
 export ANTHROPIC_API_KEY='new-key-here'

@@ -42,7 +42,7 @@ jinja2>=3.1.0
 **实际情况**:
 ```yaml
 # skill_config.yaml 修正前：
-api_key: "sk-SXCk..."  # 明文密钥仍在原文件中
+api_key: "sk-SXCk...（完整值不再复述，已在修正后删除）"  # 明文密钥曾在原文件中
 
 # environment_checker.py 只做了：
 if api_key_in_config:
@@ -166,7 +166,7 @@ def _check_data_sourcing(self, content, search_context):
 
 1. **作废泄露的API密钥**: 
    - 登录`bobdong.cn`后台
-   - 作废密钥: `sk-SXCkjzLkvG2ElDmyvkz3D4i1W7GatMXrqwLSTRuXYIUf028S`
+   - 作废泄露的旧密钥（完整值见 Git 历史 02104cb 之前的版本，此处不再复述）
    - 生成新密钥
    - 设置环境变量: `export ANTHROPIC_API_KEY='new-key'`
 

@@ -368,7 +368,7 @@ export ANTHROPIC_API_KEY="your-new-key-here"
 $env:ANTHROPIC_API_KEY="your-new-key-here"
 ```
 
-**重要**: 请立即登录`bobdong.cn`后台，作废密钥`sk-SXCk...`。
+**重要**: 请立即登录`bobdong.cn`后台，作废泄露的旧密钥（完整值见 Git 历史，不再复述）。
 
 ---
 

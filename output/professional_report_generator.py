@@ -311,6 +311,36 @@ class ProfessionalReportGenerator:
         margin: 20px 0;
     }
 
+    /* 反事实检验区块（P0任务4新增） */
+    .counter-argument-section {
+        background: #f5f5f5;
+        border: 2px solid #9e9e9e;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+    }
+
+    .counter-argument-section h3 {
+        color: #d32f2f;
+        font-size: 20px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #d32f2f;
+        padding-bottom: 10px;
+    }
+
+    .counter-argument-section h4 {
+        color: #333;
+        font-size: 16px;
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+
+    .counter-argument-content {
+        background: white;
+        padding: 15px;
+        border-radius: 4px;
+    }
+
     /* 列表样式 */
     ul, ol {
         margin: 15px 0 15px 30px;
@@ -430,7 +460,7 @@ class ProfessionalReportGenerator:
         return content
 
     def _generate_section(self, title: str, section_data: Dict) -> str:
-        """生成章节"""
+        """生成章节（含反事实检验）"""
         quality_score = section_data.get('quality_score', 0)
         content = section_data.get('content', '暂无数据')
 
@@ -445,6 +475,43 @@ class ProfessionalReportGenerator:
             badge_class = "quality-fair"
             badge_text = "一般"
 
+        # 反事实检验小节（P0任务4）
+        counter_argument_html = ""
+        counter_arg = section_data.get('counter_argument', {})
+
+        if counter_arg and counter_arg.get('rebuttal'):
+            # 有反事实检验数据
+            rebuttals = counter_arg.get('rebuttal', [])
+            responses = counter_arg.get('response', [])
+            verdict = counter_arg.get('verdict', '')
+
+            rebuttals_html = "".join([f"<li>{r}</li>" for r in rebuttals])
+            responses_html = "".join([f"<li>{r}</li>" for r in responses])
+
+            counter_argument_html = f"""
+<div class="counter-argument-section">
+    <h3>【反方观点】本章结论的最强反驳</h3>
+
+    <div class="counter-argument-content">
+        <h4>反驳点：</h4>
+        <ul>{rebuttals_html}</ul>
+
+        <h4>我方回应：</h4>
+        <ul>{responses_html}</ul>
+
+        <h4>综合判断：</h4>
+        <p>{verdict}</p>
+    </div>
+</div>
+            """
+        else:
+            # 无反事实检验数据，显示提示
+            counter_argument_html = """
+<div class="warning-box">
+    <strong>⚠️ 质量提示</strong>：本章未做反事实检验。建议补充反驳观点以增强论证严谨性。
+</div>
+            """
+
         return f"""
 <div class="page">
     <h2>
@@ -454,6 +521,8 @@ class ProfessionalReportGenerator:
         </span>
     </h2>
     <p>{content}</p>
+
+    {counter_argument_html}
 </div>
 """
 

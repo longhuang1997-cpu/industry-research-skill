@@ -120,20 +120,39 @@ class ResearchEngine:
 
     # ==================== 2. 动态工作流 ====================
 
-    def create_workflow(self, dimensions: List[str]) -> List[Dict]:
+    def create_workflow(self, dimensions: List[str], research_type: str = "行业分析",
+                       interaction_density: str = "guided") -> Dict:
         """
-        生成动态工作流（自动解析依赖关系）
+        生成动态工作流（自动解析依赖关系）+ 假设-证据-结论三段式
 
-        输入: ['政策环境', '竞争格局']
-        输出: [
-            {'name': '行业画像', 'time': 2},  # 自动补充必需维度
-            {'name': '市场规模', 'time': 8},  # 竞争格局依赖市场规模
-            {'name': '政策环境', 'time': 8},
-            {'name': '竞争格局', 'time': 10},
-            {'name': '战略建议', 'time': 10}  # 自动补充必需维度
-        ]
+        Args:
+            dimensions: 分析维度列表
+            research_type: 研究类型（公司对标/行业分析/投资尽调/战略指导/市场进入可行性/合作评估）
+            interaction_density: 交互密度（guided=新手模式，expert=专家模式）
+
+        输入: ['政策环境', '竞争格局'], research_type="行业分析"
+        输出: {
+            'research_type': '行业分析',
+            'interaction_density': 'guided',
+            'workflow': [
+                {
+                    'name': '行业画像',
+                    'time': 2,
+                    'prompt_template': 'profile',
+                    'hypothesis': '该行业处于快速增长期',
+                    'evidence_needed': {
+                        'required': ['市场规模数据', '年增长率'],
+                        'supporting': ['行业生命周期指标'],
+                        'counter': ['市场饱和迹象']
+                    },
+                    'conclusion_format': '必须回答：行业规模、增速、生命周期阶段'
+                },
+                ...
+            ],
+            'data_requirements': ['用户需提供的内部数据清单']
+        }
         """
-        workflow = []
+        workflow_steps = []
         needed = set(dimensions)
 
         # 1. 补充必需维度
@@ -157,16 +176,245 @@ class ResearchEngine:
         # 3. 拓扑排序（确保依赖顺序）
         sorted_dims = self._topological_sort(needed)
 
-        # 4. 生成workflow
+        # 4. 生成workflow（增强版：含假设-证据-结论）
+        data_requirements = []
+
         for dim in sorted_dims:
             if dim in self.DIMENSIONS:
-                workflow.append({
+                step = {
                     'name': dim,
                     'time': self.DIMENSIONS[dim]['time'],
                     'prompt_template': self.DIMENSIONS[dim].get('prompt_template')
-                })
+                }
 
-        return workflow
+                # 根据研究类型和维度生成假设-证据-结论
+                step_enhancement = self._generate_hypothesis_evidence_conclusion(
+                    research_type, dim
+                )
+                step.update(step_enhancement)
+
+                # 识别是否需要内部数据
+                if step_enhancement.get('needs_internal_data'):
+                    data_requirements.append(step_enhancement['internal_data_desc'])
+
+                workflow_steps.append(step)
+
+        return {
+            'research_type': research_type,
+            'interaction_density': interaction_density,
+            'workflow': workflow_steps,
+            'data_requirements': data_requirements if data_requirements else
+                ['本研究可完全基于公开数据完成']
+        }
+
+    def _generate_hypothesis_evidence_conclusion(self, research_type: str,
+                                                dimension: str) -> Dict:
+        """
+        根据研究类型和维度生成假设-证据-结论三段式
+
+        注意：这是数据生成函数，不是智能判断。智能由Agent根据SKILL.md完成。
+        """
+        # 默认模板（由Agent根据SKILL.md中的方法论工具箱自定义）
+        templates = {
+            "行业分析": {
+                "行业画像": {
+                    "hypothesis": "该行业处于特定生命周期阶段（成长/成熟/衰退）",
+                    "evidence_needed": {
+                        "required": ["市场规模数据", "年增长率", "主要玩家数量"],
+                        "supporting": ["行业集中度CR4", "技术迭代周期"],
+                        "counter": ["市场饱和迹象", "增速放缓数据"]
+                    },
+                    "conclusion_format": "必须回答：行业规模X亿元、年增速Y%、处于Z阶段",
+                    "needs_internal_data": False
+                },
+                "政策环境": {
+                    "hypothesis": "政策对行业发展起促进/抑制/中性作用",
+                    "evidence_needed": {
+                        "required": ["最新政策文件", "补贴/税收优惠细则"],
+                        "supporting": ["政策执行案例", "地方落地情况"],
+                        "counter": ["政策收紧信号", "补贴退坡时间表"]
+                    },
+                    "conclusion_format": "必须回答：主要政策、影响方向（促进/抑制）、持续性判断",
+                    "needs_internal_data": False
+                },
+                "市场规模": {
+                    "hypothesis": "市场空间足够大且增速可持续",
+                    "evidence_needed": {
+                        "required": ["TAM数据（自上而下+自下而上）", "历史增长率"],
+                        "supporting": ["SAM/SOM测算", "渗透率数据"],
+                        "counter": ["市场饱和迹象", "替代品威胁"]
+                    },
+                    "conclusion_format": "必须回答：TAM/SAM/SOM三层、当前渗透率、未来3年CAGR",
+                    "needs_internal_data": False
+                },
+                "竞争格局": {
+                    "hypothesis": "市场集中度处于X水平，竞争强度为Y",
+                    "evidence_needed": {
+                        "required": ["主要玩家市占率", "CR4/CR8指数"],
+                        "supporting": ["Porter五力分析数据", "新进入者数量"],
+                        "counter": ["市场整合迹象", "价格战信号"]
+                    },
+                    "conclusion_format": "必须回答：CR4=X%、竞争强度（激烈/中等/温和）、未来演化方向",
+                    "needs_internal_data": False
+                }
+            },
+            "公司对标": {
+                "核心能力": {
+                    "hypothesis": "标杆公司A的核心竞争力是X，对标公司B可以/不可以复制",
+                    "evidence_needed": {
+                        "required": ["A公司核心能力拆解（VRIO）", "B公司现有能力盘点"],
+                        "supporting": ["A公司历史发展路径", "B公司资源禀赋"],
+                        "counter": ["A公司的能力在B公司场景下失效的证据"]
+                    },
+                    "conclusion_format": "必须回答：A公司核心能力是什么？B公司哪些能复制/哪些不能？",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "B公司内部：组织架构、技术栈、核心团队背景"
+                },
+                "壁垒迁移": {
+                    "hypothesis": "A公司的壁垒在B公司所在市场X%有效",
+                    "evidence_needed": {
+                        "required": ["两个市场的PEST对比", "壁垒来源分析"],
+                        "supporting": ["可迁移能力清单", "需要重建的能力清单"],
+                        "counter": ["壁垒完全失效的证据（如政策/技术环境根本不同）"]
+                    },
+                    "conclusion_format": "必须回答：哪些壁垒可迁移？哪些失效？需要哪些替代方案？",
+                    "needs_internal_data": False
+                },
+                "财务测算": {
+                    "hypothesis": "学标杆的ROI为X%，回收期Y年，财务可行",
+                    "evidence_needed": {
+                        "required": ["获客成本", "客单价", "留存率", "运营成本结构"],
+                        "supporting": ["A公司的单位经济数据", "B公司现有成本数据"],
+                        "counter": ["悲观情景下的亏损测算"]
+                    },
+                    "conclusion_format": "必须回答：三情景（乐观/基准/悲观）NPV、IRR、回收期，最敏感变量是什么",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "B公司内部：历史财务数据、成本结构、定价策略"
+                }
+            },
+            "投资尽调": {
+                "商业模式": {
+                    "hypothesis": "标的商业模式可持续，四方价值分配平衡",
+                    "evidence_needed": {
+                        "required": ["客户/供应商/公司/投资人各方价值量化"],
+                        "supporting": ["商业模式演化路径", "关键转换点"],
+                        "counter": ["某一方价值为负的证据（如持续烧钱无盈利路径）"]
+                    },
+                    "conclusion_format": "必须回答：四方各得到什么？模式可持续吗？最大风险点是哪一方可能退出？",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "标的公司：详细财务模型、客户留存数据、供应商合同条款"
+                },
+                "竞争壁垒": {
+                    "hypothesis": "标的护城河深度为X（宽/中/窄），核心壁垒是Y",
+                    "evidence_needed": {
+                        "required": ["五大壁垒评分（网络效应/转换成本/成本优势/品牌/监管）"],
+                        "supporting": ["用户留存曲线", "NPS数据", "成本结构对比"],
+                        "counter": ["竞争对手的破局路径分析"]
+                    },
+                    "conclusion_format": "必须回答：总分多少？核心壁垒是什么？最容易被攻破的是什么？",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "标的公司：用户留存数据、成本结构、专利清单"
+                },
+                "估值测算": {
+                    "hypothesis": "合理估值区间为X-Y亿，当前估值合理/高估/低估",
+                    "evidence_needed": {
+                        "required": ["未来5年现金流预测", "WACC参数", "可比公司倍数"],
+                        "supporting": ["DCF敏感性分析", "可比公司选择逻辑"],
+                        "counter": ["悲观情景下的估值下限"]
+                    },
+                    "conclusion_format": "必须回答：DCF估值、可比公司法估值、两种方法的差异reconcile、最终建议区间",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "标的公司：历史财务数据、未来业务计划、股权结构"
+                }
+            },
+            "战略指导": {
+                "路径设计": {
+                    "hypothesis": "推荐战略方向X，备选Y，理由是吸引力+可行性双高",
+                    "evidence_needed": {
+                        "required": ["至少3个战略选项", "吸引力×可行性矩阵评分"],
+                        "supporting": ["各选项的资源需求", "时间窗口分析"],
+                        "counter": ["推荐选项的最大风险"]
+                    },
+                    "conclusion_format": "必须回答：推荐哪个？为什么？备选是什么？执行优先级？",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "公司内部：战略目标、资源预算、管理层偏好"
+                },
+                "资源评估": {
+                    "hypothesis": "关键资源缺口是X，获取方式Y，成本Z",
+                    "evidence_needed": {
+                        "required": ["需要的资源清单", "现有资源盘点"],
+                        "supporting": ["缺口获取方案（自建/合作/收购）", "成本与时间估算"],
+                        "counter": ["资源无法获取的情况下的替代方案"]
+                    },
+                    "conclusion_format": "必须回答：关键缺口是什么？如何获取？成本多少？时间多久？",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "公司内部：人力/资金/技术/渠道现状盘点"
+                }
+            },
+            "市场进入可行性": {
+                "进入壁垒": {
+                    "hypothesis": "进入壁垒总分X（低/中/高），最难跨越的是Y",
+                    "evidence_needed": {
+                        "required": ["五维壁垒评分（政策/资金/技术/渠道/品牌）"],
+                        "supporting": ["各维度跨越方案", "时间窗口分析"],
+                        "counter": ["壁垒降低的可能性（政策开放/技术突破）"]
+                    },
+                    "conclusion_format": "必须回答：总分多少？最难跨越的是什么？建议破局路径？",
+                    "needs_internal_data": False
+                },
+                "单位经济": {
+                    "hypothesis": "LTV/CAC比率X，单位经济可行/不可行",
+                    "evidence_needed": {
+                        "required": ["CAC", "LTV", "留存曲线", "毛利率"],
+                        "supporting": ["回收期测算", "三情景敏感性分析"],
+                        "counter": ["关键变量恶化情景（如留存率低于预期）"]
+                    },
+                    "conclusion_format": "必须回答：LTV/CAC比率？回收期？关键风险变量是什么？",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "公司内部：现有获客成本、运营成本结构"
+                }
+            },
+            "合作评估": {
+                "合作价值": {
+                    "hypothesis": "合作带来增量价值X亿，主要来自Y协同",
+                    "evidence_needed": {
+                        "required": ["资源互补清单", "协同效应量化（收入/成本/能力）"],
+                        "supporting": ["类似合作案例", "协同实现路径"],
+                        "counter": ["协同无法实现的风险（如文化冲突）"]
+                    },
+                    "conclusion_format": "必须回答：增量价值多少？主要来自哪种协同？实现概率多大？",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "双方公司：详细业务数据、客户重叠分析、成本结构"
+                },
+                "风险识别": {
+                    "hypothesis": "最大风险点是X，建议对冲方案Y",
+                    "evidence_needed": {
+                        "required": ["利益冲突点清单", "各冲突点严重性评估"],
+                        "supporting": ["对冲方案设计（对赌/清算权/一票否决）"],
+                        "counter": ["风险可接受的情况"]
+                    },
+                    "conclusion_format": "必须回答：最大风险点是什么？建议哪些对冲条款？",
+                    "needs_internal_data": True,
+                    "internal_data_desc": "双方公司：股权结构、治理架构、历史合作案例"
+                }
+            }
+        }
+
+        # 返回对应模板，如果没有则返回通用模板
+        if research_type in templates and dimension in templates[research_type]:
+            return templates[research_type][dimension]
+        else:
+            # 通用模板
+            return {
+                "hypothesis": f"关于{dimension}的初始假设（由Agent根据SKILL.md生成）",
+                "evidence_needed": {
+                    "required": ["关键证据1", "关键证据2"],
+                    "supporting": ["支撑证据"],
+                    "counter": ["反驳证据"]
+                },
+                "conclusion_format": f"必须回答：{dimension}的核心问题",
+                "needs_internal_data": False
+            }
 
     def _topological_sort(self, dimensions: set) -> List[str]:
         """拓扑排序（确保依赖关系正确）"""
