@@ -1,8 +1,8 @@
 ---
 name: industry-research
-description: AI驱动的咨询级行业研究 - 分析行业时自动调用
-version: 1.1.0
-author: Universal Agent Compatible (2026-09-12)
+description: AI驱动的研究方法论脚手架 - 六类型故事线+假设-证据-结论+质量关卡
+version: 1.0.0
+author: Universal Agent Compatible (2026-09-13)
 ---
 
 # Industry Research Skill
