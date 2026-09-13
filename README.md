@@ -2,12 +2,12 @@
 
 > **AI驱动的研究方法论脚手架** - 让不会做研究的人学会做研究，让会做研究的人提效10倍
 
-[![Version](https://img.shields.io/badge/version-2.2-blue.svg)](https://github.com/longhuang1997-cpu/industry-research-skill)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/longhuang1997-cpu/industry-research-skill)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
-[![Cockpit Ready](https://img.shields.io/badge/cockpit-v2.2-purple.svg)](SKILL.md)
+[![Cockpit Ready](https://img.shields.io/badge/cockpit-v1.0.0-purple.svg)](SKILL.md)
 
-**🎉 v2.2 重大升级**（2026-09-13）
+**🎉 v1.0.0 正式发布**（2026-09-13）
 - ✅ 六种研究类型故事线（公司对标/行业分析/投资尽调/战略指导/市场进入/合作评估）
 - ✅ 假设-证据-结论三段式
 - ✅ 方法论工具箱（17个模型×三要素：使用条件/输出判据/常见误用）
@@ -20,7 +20,7 @@
 
 ## 🎯 这是什么？
 
-**Industry Research Skill v2.2** - 研究方法论的脚手架，不是自动化研究工具。
+**Industry Research Skill v1.0.0** - 研究方法论的脚手架，不是自动化研究工具。
 
 ### 核心价值（双层）
 
@@ -54,7 +54,7 @@
 
 ---
 
-## ✨ v2.2 核心特性
+## ✨ v1.0.0 核心特性
 
 ### 1. 六种研究类型故事线
 
@@ -162,9 +162,9 @@ build前自动核验：
 
 ### 安装
 
-**方式1：使用已安装的cockpit v2.2**（推荐）
+**方式1：使用已安装的cockpit v1.0.0**（推荐）
 
-技能已合并进已安装的`local.industry-research-cockpit` v2.2，无需额外安装。
+技能已合并进已安装的`local.industry-research-cockpit` v1.0.0，无需额外安装。
 
 **方式2：从源码安装**
 
@@ -327,8 +327,8 @@ MIT License - 可自由使用、修改和商业化
 ### Q: 需要什么样的API？
 A: 任何兼容Anthropic API的服务（Claude API官方或兼容接口）。推荐Sonnet 4或Opus 5模型。
 
-### Q: v2.2和之前版本的区别？
-A: v2.2是研究方法论脚手架，重点是"教会做研究"而非"自动化研究"。核心升级：
+### Q: v1.0.0和之前版本的区别？
+A: v1.0.0是首个正式版本，是研究方法论脚手架。核心特性：
 - 六种研究类型故事线（论证逻辑链）
 - 假设-证据-结论三段式
 - 方法论工具箱（17个模型的应用指导）
@@ -352,7 +352,7 @@ A:
 - **expert模式**（专家/快速）：仅研究类型确认1次，其余自动推进，初稿标记"洞察点"等用户补充
 
 ### Q: 支持哪些研究类型？
-A: 六种（v2.2）：
+A: 六种（v1.0.0）：
 1. 公司对标（A vs B，B能不能学A）
 2. 行业分析（市场规模、驱动因素、竞争格局、趋势、机会）
 3. 投资尽调（标的画像、商业模式、壁垒、风险、估值）
@@ -380,32 +380,16 @@ python core/honest_quality_gate.py
 
 ## 📈 版本历史
 
-### v2.2（2026-09-13）- 研究方法论脚手架升级
-- ✅ 六种研究类型故事线
+### v1.0.0（2026-09-13）- 首个正式版本
+- ✅ 六种研究类型故事线（公司对标/行业分析/投资尽调/战略指导/市场进入/合作评估）
 - ✅ 假设-证据-结论三段式
-- ✅ 方法论工具箱（17个模型×三要素）
-- ✅ 反事实检验
-- ✅ 诚实质量关卡
-- ✅ 引用-原文核验
-- ✅ guided/expert双模式
+- ✅ 方法论工具箱（17个模型×三要素：使用条件/输出判据/常见误用）
+- ✅ 反事实检验（每章强制自我辩论）
+- ✅ 诚实质量关卡（区分真实数据vs LLM记忆，零容忍欺骗）
+- ✅ 引用-原文核验（防止数据造假）
+- ✅ guided/expert双模式（新手引导vs专家快速）
 - 🔧 修复：维度白名单扩展（新增11个专用维度）
 - 🔧 修复：data_requirements收集逻辑
-
-### v2.1（2026-09-13）- 诚实质量关卡
-- ✅ HonestQualityGate：区分真实搜索vs LLM记忆
-- ✅ 来源覆盖率检查
-- ✅ 零依赖（纯标准库）
-- 🔧 安全修复：删除明文API密钥
-
-### v2.0（2026-09-12）- 已废弃
-- ⚠️ 存在严重缺陷（Web搜索未实现、零依赖误导、效果数据编造）
-- 已被v2.1/v2.2替代
-
-### v1.1.0（2026-09-12）
-- ✅ 去除平台硬编码，支持任何AI Agent调用
-- ✅ 统一调用接口，跨平台兼容
-- ✅ 删除空壳MCP，简化架构
-- ✅ 集成意图解析到主流程
 
 ---
 
