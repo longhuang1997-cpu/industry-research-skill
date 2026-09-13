@@ -44,6 +44,11 @@ output/charts/*.svg
 output/full_report_*/
 output/quick_summary_*.pdf
 
+# Company confidential research reports
+output/octopus_energy/
+output/vanke_service/
+output/*/
+
 # Test files
 test_*.svg
 test_*.html
