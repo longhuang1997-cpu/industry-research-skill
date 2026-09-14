@@ -1,6 +1,7 @@
-# Industry Research Skill
+# 🔬 AI研究方法论工具箱 - 让研究有章法、有质量、可复制
 
-> **AI驱动的研究方法论脚手架** - 让不会做研究的人学会做研究，让会做研究的人提效10倍
+> 研究方法论脚手架，不是自动化工具。**让新手学会做研究，让专家提效10倍**。  
+> 6种研究类型 × 17个咨询模型 × 假设-证据-结论 × 质量关卡防偷懒 → 投资尽调/市场进入/公司对标等正式交付场景，可溯源、不漏维度、有复利
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/longhuang1997-cpu/industry-research-skill)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
