@@ -106,15 +106,24 @@ class Orchestrator:
                 result = self.engine.analyze(industry, dim, context)
                 results.append(result)
 
+                # Phase 3: 搜索反面证据
+                print(f"[OK] 正在搜索反面证据...", end=' ')
+                counter_evidences = self.engine.find_counter_evidence(
+                    result.get('content', ''),
+                    dim
+                )
+                result['counter_evidences'] = counter_evidences
+                print(f"找到{len(counter_evidences)}个", end=' ')
+
                 # 更新上下文
                 context[dim] = result.get('content', '')
 
                 # 显示质量分数
                 score = result.get('quality_score', 0)
                 if score >= 0.7:
-                    print(f"[OK] (质量: {score:.2f})")
+                    print(f"(质量: {score:.2f})")
                 else:
-                    print(f"[WARN] (质量: {score:.2f}, 偏低)")
+                    print(f"(质量: {score:.2f}, 偏低)")
 
             # Step 4: 质量检查
             print(f"\n[Step 4] 质量检查...")
