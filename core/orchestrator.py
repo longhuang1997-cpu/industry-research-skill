@@ -48,6 +48,13 @@ class Orchestrator:
         from output.professional_report_generator import ProfessionalReportGenerator
         self.report_generator = ProfessionalReportGenerator()
 
+        # Phase 3 任务2: 加载用户自定义模型
+        user_models = self.engine.get_user_models()
+        if user_models:
+            print(f"[Orchestrator] ✅ 用户自定义模型: {len(user_models)}个")
+            for model_name in user_models.keys():
+                print(f"   - {model_name}")
+
     def run(self, industry: str, user_params: Optional[Dict] = None) -> Dict:
         """
         主入口
