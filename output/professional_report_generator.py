@@ -505,8 +505,13 @@ class ProfessionalReportGenerator:
 </div>
             """
         else:
-            # 无反事实检验数据，显示提示
-            counter_argument_html = """
+            # Phase 3: 显示自动搜索的反面证据
+            counter_evidences = analysis.get('counter_evidences', [])
+            if counter_evidences:
+                counter_argument_html = self._render_phase3_counter_evidences(counter_evidences)
+            else:
+                # 无反事实检验数据，显示提示
+                counter_argument_html = """
 <div class="warning-box">
     <strong>⚠️ 质量提示</strong>：本章未做反事实检验。建议补充反驳观点以增强论证严谨性。
 </div>
@@ -547,6 +552,54 @@ class ProfessionalReportGenerator:
     </ul>
 </div>
 """
+
+    def _render_phase3_counter_evidences(self, counter_evidences: List[Dict]) -> str:
+        """
+        渲染Phase 3自动搜索的反面证据
+
+        Args:
+            counter_evidences: 反面证据列表
+
+        Returns:
+            HTML字符串
+        """
+        if not counter_evidences:
+            return ""
+
+        evidences_html = ""
+        for i, evidence in enumerate(counter_evidences, 1):
+            title = evidence.get('title', '未知标题')
+            source = evidence.get('source', '#')
+            snippet = evidence.get('snippet', '无摘要')
+
+            evidences_html += f"""
+        <div style="margin: 15px 0; padding-left: 10px; border-left: 3px solid #ffc107;">
+            <strong>{i}. <a href="{source}" target="_blank" style="color: #1976d2;">{title}</a></strong>
+            <blockquote style="margin: 8px 0; padding-left: 15px; border-left: 2px solid #ddd; color: #555;">
+                {snippet}
+            </blockquote>
+        </div>
+            """
+
+        return f"""
+<div class="counter-argument-section">
+    <h3>【反方观点】本章结论的最强反驳</h3>
+
+    <h4>🔍 AI自动搜索到的反面证据：</h4>
+    <div class="counter-argument-content">
+        {evidences_html}
+    </div>
+
+    <h4>💡 提示：</h4>
+    <div class="warning-box" style="margin-top: 10px;">
+        <p>以上反面证据由AI自动搜索发现。建议：</p>
+        <ul>
+            <li>补充<strong>【我方回应】</strong>：针对每条反面证据的回应</li>
+            <li>给出<strong>【综合判断】</strong>：考虑反面证据后的最终结论</li>
+        </ul>
+    </div>
+</div>
+        """
 
 
 def main():

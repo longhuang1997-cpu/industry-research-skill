@@ -151,6 +151,12 @@ class ResearchEngine:
         self.max_tokens = config.max_tokens
         self.temperature = config.temperature
 
+        # Phase 3: 反面证据引擎（延迟加载）
+        self.counter_evidence_engine = None
+
+        # Phase 3 任务2: 用户自定义模型（延迟加载）
+        self.user_model_loader = None
+
     # ==================== 1. 意图理解 ====================
 
     def parse_intent(self, user_input: str) -> Dict:
@@ -948,3 +954,79 @@ class ResearchEngine:
             'suggestions': suggestions,
             'avg_quality': sum(r.get('quality_score', 0) for r in results) / max(len(results), 1)
         }
+
+    # ==================== 5. Phase 3: 反面证据搜索 ====================
+
+    def find_counter_evidence(self, chapter_content: str, chapter_title: str) -> List[Dict]:
+        """
+        搜索反面证据（Phase 3新增）
+
+        Args:
+            chapter_content: 章节内容
+            chapter_title: 章节标题
+
+        Returns:
+            [
+                {
+                    'source': 'https://...',
+                    'title': '...',
+                    'snippet': '...',
+                    'query': '...'
+                },
+                ...
+            ]
+        """
+        # 延迟加载反面证据引擎
+        if self.counter_evidence_engine is None:
+            try:
+                from core.counter_evidence_engine import CounterEvidenceEngine
+                self.counter_evidence_engine = CounterEvidenceEngine()
+                print("[Phase 3] ✅ 反面证据引擎已加载")
+            except ImportError as e:
+                print(f"[Phase 3] ⚠️ 反面证据引擎加载失败: {e}")
+                return []
+
+        try:
+            return self.counter_evidence_engine.find_counter_evidence(
+                chapter_content,
+                chapter_title
+            )
+        except Exception as e:
+            print(f"[Phase 3] ⚠️ 反面证据搜索失败: {e}")
+            return []
+
+    # ==================== 6. Phase 3 任务2: 用户自定义模型 ====================
+
+    def get_user_models(self) -> Dict:
+        """
+        获取用户自定义模型（延迟加载）
+
+        Returns:
+            {model_name: model_config}
+        """
+        if self.user_model_loader is None:
+            try:
+                from core.user_model_loader import UserModelLoader
+                self.user_model_loader = UserModelLoader()
+                print(f"[Phase 3] ✅ 用户模型库已加载: {len(self.user_model_loader.models)}个自定义模型")
+            except ImportError as e:
+                print(f"[Phase 3] ⚠️ 用户模型库加载失败: {e}")
+                return {}
+            except Exception as e:
+                print(f"[Phase 3] ⚠️ 用户模型库初始化失败: {e}")
+                return {}
+
+        return self.user_model_loader.models
+
+    def get_user_model(self, name: str) -> Optional[Dict]:
+        """
+        获取指定的用户自定义模型
+
+        Args:
+            name: 模型名称
+
+        Returns:
+            模型配置字典，不存在则返回None
+        """
+        models = self.get_user_models()
+        return models.get(name)

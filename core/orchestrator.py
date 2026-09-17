@@ -48,6 +48,13 @@ class Orchestrator:
         from output.professional_report_generator import ProfessionalReportGenerator
         self.report_generator = ProfessionalReportGenerator()
 
+        # Phase 3 任务2: 加载用户自定义模型
+        user_models = self.engine.get_user_models()
+        if user_models:
+            print(f"[Orchestrator] ✅ 用户自定义模型: {len(user_models)}个")
+            for model_name in user_models.keys():
+                print(f"   - {model_name}")
+
     def run(self, industry: str, user_params: Optional[Dict] = None) -> Dict:
         """
         主入口
@@ -106,15 +113,24 @@ class Orchestrator:
                 result = self.engine.analyze(industry, dim, context)
                 results.append(result)
 
+                # Phase 3: 搜索反面证据
+                print(f"[OK] 正在搜索反面证据...", end=' ')
+                counter_evidences = self.engine.find_counter_evidence(
+                    result.get('content', ''),
+                    dim
+                )
+                result['counter_evidences'] = counter_evidences
+                print(f"找到{len(counter_evidences)}个", end=' ')
+
                 # 更新上下文
                 context[dim] = result.get('content', '')
 
                 # 显示质量分数
                 score = result.get('quality_score', 0)
                 if score >= 0.7:
-                    print(f"[OK] (质量: {score:.2f})")
+                    print(f"(质量: {score:.2f})")
                 else:
-                    print(f"[WARN] (质量: {score:.2f}, 偏低)")
+                    print(f"(质量: {score:.2f}, 偏低)")
 
             # Step 4: 质量检查
             print(f"\n[Step 4] 质量检查...")
@@ -140,12 +156,30 @@ class Orchestrator:
             report_path = self._generate_report(industry, report_data)
             print(f"   [OK] 报告已生成: {report_path}")
 
+            # Phase 3 任务3: 多格式导出（可选）
+            export_formats = user_params.get('export_formats', [])
+            exported_files = {}
+            if export_formats:
+                print(f"\n[Step 6] 导出多种格式...")
+                from output.report_exporter import ReportExporter
+                exporter = ReportExporter()
+
+                for fmt in export_formats:
+                    try:
+                        output_path = exporter.export_report(report_path, fmt)
+                        exported_files[fmt] = output_path
+                        print(f"   [OK] {fmt.upper()}: {output_path}")
+                    except Exception as e:
+                        print(f"   [WARN] {fmt.upper()}导出失败: {e}")
+
             # 返回结果
             print(f"\n{'='*60}")
             print(f"[SUCCESS] 研究完成!")
+            if exported_files:
+                print(f"[INFO] 导出格式: {', '.join(exported_files.keys())}")
             print(f"{'='*60}\n")
 
-            return {
+            result = {
                 'status': 'success',
                 'industry': industry,
                 'mode': self.mode,
@@ -154,6 +188,12 @@ class Orchestrator:
                 'analysis_results': results,
                 'total_time': total_time
             }
+
+            # 添加导出文件信息
+            if exported_files:
+                result['exported_files'] = exported_files
+
+            return result
 
         except Exception as e:
             print(f"\n{'='*60}")
