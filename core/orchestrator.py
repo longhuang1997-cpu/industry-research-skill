@@ -156,12 +156,30 @@ class Orchestrator:
             report_path = self._generate_report(industry, report_data)
             print(f"   [OK] 报告已生成: {report_path}")
 
+            # Phase 3 任务3: 多格式导出（可选）
+            export_formats = user_params.get('export_formats', [])
+            exported_files = {}
+            if export_formats:
+                print(f"\n[Step 6] 导出多种格式...")
+                from output.report_exporter import ReportExporter
+                exporter = ReportExporter()
+
+                for fmt in export_formats:
+                    try:
+                        output_path = exporter.export_report(report_path, fmt)
+                        exported_files[fmt] = output_path
+                        print(f"   [OK] {fmt.upper()}: {output_path}")
+                    except Exception as e:
+                        print(f"   [WARN] {fmt.upper()}导出失败: {e}")
+
             # 返回结果
             print(f"\n{'='*60}")
             print(f"[SUCCESS] 研究完成!")
+            if exported_files:
+                print(f"[INFO] 导出格式: {', '.join(exported_files.keys())}")
             print(f"{'='*60}\n")
 
-            return {
+            result = {
                 'status': 'success',
                 'industry': industry,
                 'mode': self.mode,
@@ -170,6 +188,12 @@ class Orchestrator:
                 'analysis_results': results,
                 'total_time': total_time
             }
+
+            # 添加导出文件信息
+            if exported_files:
+                result['exported_files'] = exported_files
+
+            return result
 
         except Exception as e:
             print(f"\n{'='*60}")
