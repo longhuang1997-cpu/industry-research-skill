@@ -22,8 +22,8 @@ wheels/
 
 # Virtual Environment
 venv/
-env/
 ENV/
+env/
 
 # IDE
 .vscode/
@@ -36,26 +36,32 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Output files
-output/*.svg
-output/*.pdf
-output/*.html
-output/charts/*.svg
-output/full_report_*/
-output/quick_summary_*.pdf
-
-# Company confidential research reports
-output/octopus_energy/
-output/vanke_service/
-output/*/
-
-# Test files
-test_*.svg
-test_*.html
-
-# Logs
+# Project specific
+config.yaml
 *.log
-
-# Temporary files
 *.tmp
-*.bak
+
+# Output files (generated reports)
+output/**/*.html
+output/**/*.docx
+output/**/*.md
+output/**/*.pdf
+outputs/
+
+# Test files (generated during testing)
+test_*.html
+test_*.docx
+test_*.md
+test_report.html
+
+# Claude session
+.claude/
+
+# Execution logs
+execution/
+
+# Phase 3 planning docs (keep in repo for reference)
+# PHASE3_*.md are kept for documentation
+
+# Keep examples but ignore generated outputs
+examples/*/output/
