@@ -22,15 +22,33 @@ class ProfessionalReportGenerator:
     生成咨询公司水准的HTML/PDF报告
     """
 
-    def __init__(self, output_dir: str = "output"):
+    def __init__(self, output_dir: str = None):
         """
         初始化报告生成器
 
         Args:
-            output_dir: 输出目录
+            output_dir: 输出目录（可选）
+                - None: 自动选择（优先桌面，其次当前目录，最后skill目录）
+                - 相对路径: 相对于当前工作目录
+                - 绝对路径: 使用指定路径
         """
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(exist_ok=True)
+        # 智能选择输出目录（零硬编码）
+        if output_dir is None:
+            # 优先级1: 桌面（如果存在且可写）
+            desktop = Path.home() / "Desktop"
+            if desktop.exists() and desktop.is_dir():
+                self.output_dir = desktop / "industry_research_reports"
+                self.output_dir.mkdir(exist_ok=True)
+                print(f"[ReportGenerator] 输出目录: {self.output_dir} (桌面)")
+            # 优先级2: 当前工作目录
+            else:
+                self.output_dir = Path.cwd() / "output"
+                self.output_dir.mkdir(exist_ok=True)
+                print(f"[ReportGenerator] 输出目录: {self.output_dir} (当前目录)")
+        else:
+            self.output_dir = Path(output_dir)
+            self.output_dir.mkdir(exist_ok=True, parents=True)
+            print(f"[ReportGenerator] 输出目录: {self.output_dir} (指定路径)")
 
     def generate_report(self,
                        industry: str,
