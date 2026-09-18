@@ -57,8 +57,10 @@ test_report.html
 # Claude session
 .claude/
 
-# Execution logs
-execution/
+# Execution logs and temp files
+execution/*.log
+execution/*.tmp
+execution/__pycache__/
 
 # Phase 3 planning docs (keep in repo for reference)
 # PHASE3_*.md are kept for documentation
