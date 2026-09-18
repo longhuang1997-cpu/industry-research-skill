@@ -3,10 +3,21 @@
 > 研究方法论脚手架，不是自动化工具。**让新手学会做研究，让专家提效10倍**。  
 > 6种研究类型 × 57+个咨询模型 × 假设-证据-结论 × 质量关卡防偷懒 × 辩证思考 × 自定义框架 → 投资尽调/市场进入/公司对标等正式交付场景，可溯源、不漏维度、有复利
 
-[![Version](https://img.shields.io/badge/version-3.0--alpha-blue.svg)](https://github.com/longhuang1997-cpu/industry-research-skill)
+[![Version](https://img.shields.io/badge/version-3.2--zero--api-blue.svg)](https://github.com/longhuang1997-cpu/industry-research-skill)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 [![Phase](https://img.shields.io/badge/phase-3%20(core%20complete)-brightgreen.svg)](PHASE3_CORE_COMPLETE.md)
+[![Zero API](https://img.shields.io/badge/Zero%20API-All%20Agents%20Compatible-brightgreen.svg)](ZERO_API_FULL_ANALYSIS_GUIDE.md)
+
+**🎉 v3.2 重大更新**（2026-01-09）- 零API完整分析
+- ✅ **零API完整分析**：不需要任何API密钥，所有Agent都可以调用
+- ✅ **方法论+执行分离**：Skill提供框架，Agent负责执行
+- ✅ **智能任务清单**：生成完整Prompt列表，含假设-证据-结论框架
+- ✅ **质量评估函数**：实时质量检查
+- ✅ **专业报告生成**：HTML/Word/Markdown自动生成
+- ✅ **所有Agent兼容**：WorkBuddy/Claude Code/企业内部AI Agent
+
+**详见**: [零API完整分析指南](ZERO_API_FULL_ANALYSIS_GUIDE.md) | [v3.2更新日志](CHANGELOG_v3.2.md)
 
 **🎉 v3.0-alpha 发布**（2026-09-17）- Phase 3核心任务完成
 - ✅ **反驳强化**：自动搜索反面证据，强制辩证思考
@@ -210,7 +221,51 @@ pip install -r requirements.txt
 
 ### 使用示例
 
-**场景1：公司对标研究（guided模式）+ 多格式导出**
+**🆕 场景1：零API完整分析（不需要API密钥）**
+
+```python
+# 适用于：WorkBuddy在对话中 / 其他Agent集成 / 企业内部AI能力沉淀
+from core.prompt_only_orchestrator import PromptOnlyOrchestrator
+
+# 初始化（无需API密钥）
+orch = PromptOnlyOrchestrator(mode='quick')
+
+# 获取研究任务清单
+tasks = orch.get_research_tasks(
+    industry='医疗陪护',
+    dimensions=['政策环境', '市场规模', '商业模式']
+)
+
+# Agent执行每个任务（用你自己的Agent能力）
+results = []
+for task in tasks:
+    content = your_agent.analyze(task['prompt'])  # 用你的AI能力
+    results.append({
+        'dimension': task['dimension'],
+        'content': content,
+        'quality_score': task['assess_quality'](content)
+    })
+
+# 生成专业报告
+report = orch.generate_report(
+    industry='医疗陪护',
+    analysis_results=results,
+    export_formats=['word', 'markdown']  # 可选
+)
+
+# Output: 
+# - HTML报告（桌面/industry_research_reports/）
+# - Word/Markdown（可选）
+# - 含6类型×16框架方法论
+# - 假设-证据-结论三段式
+# - 质量评估报告
+```
+
+**详见**: [零API完整分析指南](ZERO_API_FULL_ANALYSIS_GUIDE.md) | [使用示例](examples/zero_api_full_analysis.py)
+
+---
+
+**场景2：公司对标研究（需要API密钥）+ 多格式导出**
 
 ```bash
 # 启动研究
@@ -235,7 +290,7 @@ python irs.py "章鱼能源 vs 万物云能源业务" --export word,markdown
 #         - 核验记录：✅ 26个数字核验通过，⚠️ 2个口径差异
 ```
 
-**场景2：使用自定义模型库**
+**场景3：使用自定义模型库**
 
 ```bash
 # 1. 配置自定义模型（config/user_models.yaml）

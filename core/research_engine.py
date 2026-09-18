@@ -140,7 +140,7 @@ class ResearchEngine:
 
     def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None, model: Optional[str] = None):
         """初始化研究引擎"""
-        # 加载模型配置
+        # 加载模型配置（零依赖、自动降级）
         from execution.model_config import ModelConfigManager
         config_manager = ModelConfigManager()
         config = config_manager.load_config(api_key=api_key, base_url=base_url, model=model)
@@ -150,6 +150,7 @@ class ResearchEngine:
         self.model = config.model
         self.max_tokens = config.max_tokens
         self.temperature = config.temperature
+        self.mock_mode = config.mock_mode  # 是否启用Mock模式
 
         # Phase 3: 反面证据引擎（延迟加载）
         self.counter_evidence_engine = None
@@ -846,9 +847,18 @@ class ResearchEngine:
             return f"请分析{industry}行业的{template_name}。"
 
     def _call_claude(self, prompt: str) -> str:
-        """调用Claude API（带重试）"""
+        """
+        调用Claude API（带重试）或返回Mock响应
+
+        Mock模式: 当没有API密钥时，返回方法论框架而不调用API
+        """
+        # Mock模式：返回方法论框架
+        if self.mock_mode:
+            return self._mock_analysis_response(prompt)
+
+        # 正常模式：调用API
         if not self.api_key:
-            raise ValueError("未设置ANTHROPIC_API_KEY")
+            raise ValueError("未设置ANTHROPIC_API_KEY，且未启用Mock模式")
 
         import anthropic
 
@@ -885,6 +895,66 @@ class ResearchEngine:
                     raise
 
         return ""
+
+    def _mock_analysis_response(self, prompt: str) -> str:
+        """
+        Mock模式响应：返回方法论框架（不调用API）
+
+        用途：
+        1. 作为WorkBuddy/其他Agent的方法论脚手架
+        2. 演示/教学时使用
+        3. 开发测试时使用
+        """
+        # 从prompt中提取行业名和维度
+        industry = "目标行业"
+        dimension = "分析维度"
+
+        # 尝试从prompt中提取
+        if "行业:" in prompt or "行业：" in prompt:
+            try:
+                industry = prompt.split("行业:")[1].split("行业：")[1].split("\n")[0].strip()
+            except:
+                pass
+
+        if "维度:" in prompt or "维度：" in prompt:
+            try:
+                dimension = prompt.split("维度:")[1].split("维度：")[1].split("\n")[0].strip()
+            except:
+                pass
+
+        # 返回结构化的方法论框架
+        return f"""
+[Mock模式 - 方法论框架]
+
+行业: {industry}
+维度: {dimension}
+
+分析框架（请WorkBuddy/Agent根据此框架展开）：
+
+## 1. 假设 (Hypothesis)
+- 核心假设1: [基于已知信息提出]
+- 核心假设2: [基于已知信息提出]
+- 核心假设3: [基于已知信息提出]
+
+## 2. 证据 (Evidence)
+- 数据源1: [政府统计/行业报告/企业公告]
+- 数据源2: [第三方研究/用户调研]
+- 数据源3: [案例研究/专家访谈]
+
+## 3. 结论 (Conclusion)
+- 主要发现: [基于证据得出]
+- 次要发现: [基于证据得出]
+- 行动建议: [可执行的具体建议]
+
+## 4. 反驳检验 (Counter-evidence)
+- 潜在反对意见: [列出可能的质疑]
+- 证据强度评估: [数据是否充分支撑结论]
+- 建议补充: [还需要哪些证据]
+
+---
+💡 提示：这是方法论框架。请Agent根据实际数据填充各部分内容。
+💡 提示：如需完整AI分析，请设置 ANTHROPIC_API_KEY 环境变量。
+"""
 
     def _assess_quality(self, content: str) -> float:
         """

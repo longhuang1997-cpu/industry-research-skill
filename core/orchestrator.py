@@ -209,9 +209,30 @@ class Orchestrator:
             }
 
     def _generate_report(self, industry: str, data: Dict) -> str:
-        """生成HTML报告"""
-        output_dir = self.skill_root / 'output'
-        output_dir.mkdir(exist_ok=True)
+        """
+        生成HTML报告（零硬编码版）
+
+        输出位置优先级:
+        1. 桌面/industry_research_reports/（如果桌面存在且可写）
+        2. 当前工作目录/output/
+        3. skill根目录/output/（最后兜底）
+        """
+        # 优先输出到桌面
+        desktop = Path.home() / "Desktop"
+        if desktop.exists() and desktop.is_dir():
+            output_dir = desktop / "industry_research_reports"
+            output_dir.mkdir(exist_ok=True)
+            print(f"   [INFO] 输出目录: {output_dir} (桌面)")
+        # 其次输出到当前工作目录
+        elif Path.cwd() != self.skill_root:
+            output_dir = Path.cwd() / "output"
+            output_dir.mkdir(exist_ok=True)
+            print(f"   [INFO] 输出目录: {output_dir} (当前目录)")
+        # 最后兜底到skill目录
+        else:
+            output_dir = self.skill_root / 'output'
+            output_dir.mkdir(exist_ok=True)
+            print(f"   [INFO] 输出目录: {output_dir} (skill目录)")
 
         # 生成报告文件名
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -220,12 +241,13 @@ class Orchestrator:
 
         # 调用报告生成器
         try:
+            # 传入输出目录，让生成器使用同一位置
+            self.report_generator.output_dir = output_dir
             self.report_generator.generate_report(
                 industry=industry,
                 research_data=data,
                 report_type='html'
             )
-            # 假设报告生成器会保存到output目录
             return str(filepath)
         except Exception as e:
             # Fallback: 生成简单报告
