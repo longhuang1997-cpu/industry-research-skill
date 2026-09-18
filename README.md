@@ -9,15 +9,16 @@
 [![Phase](https://img.shields.io/badge/phase-3%20(core%20complete)-brightgreen.svg)](PHASE3_CORE_COMPLETE.md)
 [![Zero API](https://img.shields.io/badge/Zero%20API-All%20Agents%20Compatible-brightgreen.svg)](ZERO_API_FULL_ANALYSIS_GUIDE.md)
 
-**🎉 v3.2 重大更新**（2026-01-09）- 零API完整分析
+**🎉 v3.2 重大更新**（2026-01-09）- 零API完整分析 + 交互式研究
 - ✅ **零API完整分析**：不需要任何API密钥，所有Agent都可以调用
+- ✅ **交互式研究（新）**：多轮对话、需求澄清、中期回顾、动态调整
 - ✅ **方法论+执行分离**：Skill提供框架，Agent负责执行
 - ✅ **智能任务清单**：生成完整Prompt列表，含假设-证据-结论框架
 - ✅ **质量评估函数**：实时质量检查
 - ✅ **专业报告生成**：HTML/Word/Markdown自动生成
 - ✅ **所有Agent兼容**：WorkBuddy/Claude Code/企业内部AI Agent
 
-**详见**: [零API完整分析指南](ZERO_API_FULL_ANALYSIS_GUIDE.md) | [v3.2更新日志](CHANGELOG_v3.2.md)
+**详见**: [零API完整分析指南](ZERO_API_FULL_ANALYSIS_GUIDE.md) | [使用示例](docs/USAGE_EXAMPLES.md) | [v3.2更新日志](CHANGELOG_v3.2.md)
 
 **🎉 v3.0-alpha 发布**（2026-09-17）- Phase 3核心任务完成
 - ✅ **反驳强化**：自动搜索反面证据，强制辩证思考
@@ -261,11 +262,61 @@ report = orch.generate_report(
 # - 质量评估报告
 ```
 
-**详见**: [零API完整分析指南](ZERO_API_FULL_ANALYSIS_GUIDE.md) | [使用示例](examples/zero_api_full_analysis.py)
+**详见**: [零API完整分析指南](ZERO_API_FULL_ANALYSIS_GUIDE.md) | [使用示例](docs/USAGE_EXAMPLES.md)
 
 ---
 
-**场景2：公司对标研究（需要API密钥）+ 多格式导出**
+**🆕 场景2：交互式研究（多轮对话）**
+
+```python
+# 适用于：需求不明确，需要逐步澄清
+from core.interactive_session import InteractiveResearchSession
+
+# 初始化（零API模式）
+session = InteractiveResearchSession(backend='prompt_only')
+
+# 第一轮：用户提问
+response = session.chat("帮我研究医疗陪护行业")
+# Skill返回：你研究医疗陪护的目的是什么？
+#   1. 🚀 市场进入可行性
+#   2. 💰 投资尽调
+#   3. ⚔️ 竞争分析
+#   4. 📊 行业概览
+
+# 第二轮：选择目的
+response = session.chat("market_entry")
+# Skill返回：基于「市场进入可行性」，我推荐分析5个维度
+#   1. ✅ 全部分析（预计40分钟）
+#   2. 🎯 我来选择部分
+#   3. ⚡ 快速版（3-4个核心维度）
+
+# 第三轮：确认维度
+response = session.chat("all")
+# Skill返回：已生成5个分析任务
+
+# Agent执行任务
+for task in response['tasks']:
+    content = your_agent.analyze(task['prompt'])
+    progress = session.submit_result(task['dimension'], content)
+    
+    # 中期回顾（自动触发）
+    if progress['type'] == 'review':
+        print("📊 中期回顾：")
+        print(progress['key_findings'])
+        # 用户决定：继续/调整/生成报告
+
+# Output:
+# - 多轮对话澄清需求
+# - 需求明确后生成任务清单
+# - 中途可调整方向
+# - 生成专业报告
+```
+
+**详见**: [使用示例 - 交互式研究](docs/USAGE_EXAMPLES.md#交互式研究)
+
+---
+
+**场景3：公司对标研究（需要API密钥）+ 多格式导出**
 
 ```bash
 # 启动研究
@@ -290,7 +341,7 @@ python irs.py "章鱼能源 vs 万物云能源业务" --export word,markdown
 #         - 核验记录：✅ 26个数字核验通过，⚠️ 2个口径差异
 ```
 
-**场景3：使用自定义模型库**
+**场景4：使用自定义模型库**
 
 ```bash
 # 1. 配置自定义模型（config/user_models.yaml）
